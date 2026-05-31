@@ -95,6 +95,9 @@ desafio-conta-azul/
     documentacao_tecnica_funcional.md
     guia_celulas_notebook.md
     resumo_executivo.md
+  output/
+    doc/
+      resumo_executivo_conta_azul.docx
   notebooks/
     01_eda_funil_saas.ipynb
   scripts/
@@ -262,7 +265,11 @@ Documentos em Markdown:
 - `docs/resumo_executivo.md`: versao Markdown do resumo executivo.
 - `docs/guia_celulas_notebook.md`: guia celula a celula do notebook.
 
-Os documentos Word sao gerados localmente pelos scripts em `output/doc/`. Essa pasta e tratada como saida de processamento e nao precisa ficar versionada no repositorio.
+O resumo executivo tambem esta disponivel em Word:
+
+- `output/doc/resumo_executivo_conta_azul.docx`
+
+Os demais documentos Word podem ser gerados localmente pelos scripts em `output/doc/`, mas sao tratados como saidas de apoio e nao precisam ficar versionados no repositorio.
 
 Arquivos `.docx` devem ser abertos no Microsoft Word ou aplicativo equivalente. Ao abrir um `.docx` como texto no VS Code, o conteudo aparece como binario ilegivel.
 

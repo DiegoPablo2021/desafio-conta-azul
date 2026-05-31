@@ -9,3 +9,4 @@ __pycache__/
 Thumbs.db
 Desafio_tecnico_Business_Analytics_*.pdf
 output/doc/*.docx
+!output/doc/resumo_executivo_conta_azul.docx

@@ -493,6 +493,9 @@ desafio-conta-azul/
     documentacao_tecnica_funcional.md
     guia_celulas_notebook.md
     resumo_executivo.md
+  output/
+    doc/
+      resumo_executivo_conta_azul.docx
 ```
 
 Responsabilidades principais:
@@ -509,7 +512,7 @@ Responsabilidades principais:
 - `docs/assets/`: imagens usadas na documentacao e no README.
 - `docs/guia_celulas_notebook.md`: explicacao celula a celula do notebook de EDA.
 - `scripts/`: geradores opcionais dos documentos Word em `output/doc/`.
-- `output/doc/`: pasta de saida local criada pelos scripts; os `.docx` gerados nao precisam ser versionados.
+- `output/doc/`: pasta de saida local criada pelos scripts. O resumo executivo em Word e versionado como entregavel formal; os demais `.docx` de apoio ficam ignorados.
 
 ### 7.2 Camadas
 
@@ -1518,7 +1521,8 @@ Os dados indicam que o crescimento mais promissor passa por:
 | `scripts/export_summary_docx.py` | Criado | Gerador do resumo executivo em Word |
 | `scripts/export_presentation_script_docx.py` | Criado | Gerador do roteiro de apresentacao em Word, com textos curtos, bullets e blocos de `Fala sugerida` para explicar o dashboard Streamlit |
 | `scripts/export_notebook_guide_docx.py` | Criado | Gerador da versao Word do guia celula a celula do notebook |
-| `output/doc/*.docx` | Gerado localmente | Arquivos Word criados pelos scripts; tratados como saida local e nao versionados no repositorio |
+| `output/doc/resumo_executivo_conta_azul.docx` | Criado | Resumo executivo em Word, entregavel formal do desafio |
+| `output/doc/*.docx` | Gerado localmente | Demais arquivos Word criados pelos scripts; tratados como apoio local e nao versionados no repositorio |
 | `notebooks/01_eda_funil_saas.ipynb` | Criado | Notebook de EDA com leitura do CSV, profiling, validacoes, SQL, graficos Plotly e conclusoes |
 | `README.md` | Criado | Instrucoes de execucao |
 | `requirements.txt` | Criado | Dependencias do projeto |
@@ -1555,6 +1559,7 @@ sql/
 notebooks/01_eda_funil_saas.ipynb
 docs/resumo_executivo.md
 docs/documentacao_tecnica_funcional.md
+output/doc/resumo_executivo_conta_azul.docx
 ```
 
 Essa composicao cobre:
@@ -1562,7 +1567,7 @@ Essa composicao cobre:
 - Consultas SQL e views reproduziveis.
 - Notebook de investigacao analitica.
 - Dashboard Streamlit.
-- Resumo executivo em Markdown e script para gerar Word localmente.
+- Resumo executivo em Markdown e Word.
 - Documentacao tecnica e instrucoes de execucao.
 
 ### 22.2 Arquivos que nao precisam ser enviados
@@ -1573,7 +1578,8 @@ Essa composicao cobre:
 | `.vscode/` | Configuracao local do VS Code |
 | `__pycache__/` | Cache gerado pelo Python |
 | `.ipynb_checkpoints/` | Checkpoints automaticos do Jupyter |
-| `output/doc/*.docx` | Saidas locais geradas por script; podem ser recriadas a qualquer momento |
+| `output/doc/roteiro_apresentacao_conta_azul.docx` | Material pessoal de apoio para apresentacao |
+| `output/doc/guia_celulas_notebook.docx` | Material pessoal de apoio para explicar o notebook |
 | `docs/guia_celulas_notebook.md` | Material de apoio para explicar o notebook; enviar apenas se quiser documentacao extra |
 | Prints, temporarios e copias antigas | Nao agregam valor e podem confundir a avaliacao |
 
@@ -1633,7 +1639,7 @@ Essa combinacao entrega uma resposta aderente ao case, tecnicamente defensavel e
 - Removidas do README as orientacoes pessoais de envio/nao envio para manter o arquivo com aparencia profissional.
 - Guia celula a celula do notebook restaurado em `docs/guia_celulas_notebook.md`, mantendo o script `scripts/export_notebook_guide_docx.py` funcional.
 - Arquivo `.gitignore` criado para evitar caches Python, checkpoints Jupyter e arquivos temporarios.
-- Documentos Word testados localmente e removidos do versionamento; `output/doc/*.docx` fica ignorado no Git.
+- Resumo executivo em Word mantido no versionamento como entregavel formal; documentos Word de apoio seguem ignorados no Git.
 - Repositorio GitHub criado em `https://github.com/DiegoPablo2021/desafio-conta-azul`.
 - Dependencias travadas em `requirements.txt` para reduzir risco de quebra no deploy.
 - Geradores Word ajustados para padronizar a fonte Calibri nos documentos criados localmente.
