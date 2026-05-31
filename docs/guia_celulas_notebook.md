@@ -32,6 +32,16 @@ Fala sugerida:
 
 > Aqui eu confiro a volumetria original da base. O resultado `(10000, 12)` significa que o CSV tem 10.000 linhas e 12 colunas, exatamente o esperado pelo enunciado do desafio.
 
+### Quando o profiling mostrar `colunas = 17`
+
+O que significa:
+
+O CSV original tem 12 colunas. Depois do tratamento inicial, o dataframe `df` passa a ter colunas derivadas, como `visit_month`, `signup_date`, `purchase_date`, `funnel_stage` e `nps_class`. Por isso o profiling da base tratada mostra 17 colunas.
+
+Fala sugerida:
+
+> Aqui a diferenca e intencional: o arquivo original tem 12 colunas, mas a base analitica usada no notebook ganhou campos derivados para facilitar as analises de funil, tempo e NPS. Entao `10000 x 12` e o formato original do CSV, enquanto `10000 x 17` e a base ja preparada para analise.
+
 ### Quando aparecer `NaN`
 
 O que significa:
@@ -104,6 +114,11 @@ Fala sugerida:
 
 > Aqui confirmo que a base tem 10.000 linhas e 12 colunas. Isso valida que estou trabalhando com a volumetria esperada do enunciado.
 
+Resultado esperado:
+
+- `linhas = 10000`: quantidade de usuarios/visitas na base original.
+- `colunas = 12`: quantidade de campos originais do CSV antes do tratamento.
+
 ## Celula 6 - Secao de tratamento inicial
 
 Tipo: Markdown
@@ -142,7 +157,20 @@ Cria uma tabela resumo com quantidade de linhas, colunas, usuarios unicos, dupli
 
 Fala sugerida:
 
-> Essa tabela confirma que tenho 10.000 usuarios unicos, sem duplicidade de `user_id`, cobrindo visitas de junho a outubro de 2025.
+> Essa tabela confirma que tenho 10.000 usuarios unicos, sem duplicidade de `user_id`, cobrindo visitas de junho a outubro de 2025. Ela tambem mostra 17 colunas porque aqui ja estou olhando a base tratada, com campos derivados criados na etapa anterior.
+
+Resultado esperado:
+
+- `linhas = 10000`: total de registros analisados.
+- `colunas = 17`: base tratada, ja com campos derivados.
+- `usuarios_unicos = 10000`: cada linha representa um usuario unico.
+- `usuarios_duplicados = 0`: nao ha duplicidade de usuario.
+- `data_minima_visita = 2025-06-01`.
+- `data_maxima_visita = 2025-10-30`.
+- `canais = 5`: organic, paid, referral, social e email.
+- `dispositivos = 2`: desktop e mobile.
+- `paises = 5`: BR, MX, AR, CL e US.
+- `planos = 3`: BASIC, PRO e PREMIUM.
 
 ## Celula 10 - Perfil das categorias
 
@@ -150,9 +178,27 @@ Tipo: Codigo
 
 Usa `describe(include='all')` para resumir as colunas categoricas principais: `channel`, `device`, `country` e `plan`. Ajuda a entender distribuicoes, categorias mais frequentes e valores ausentes.
 
+Como ler a tabela:
+
+- `count`: quantidade de valores preenchidos na coluna.
+- `unique`: quantidade de categorias diferentes.
+- `top`: categoria mais frequente.
+- `freq`: quantas vezes a categoria mais frequente aparece.
+
+Resultado esperado:
+
+- `channel`: tem 10.000 valores preenchidos, 5 canais diferentes, canal mais frequente `organic`, com 4.271 usuarios.
+- `device`: tem 10.000 valores preenchidos, 2 dispositivos, dispositivo mais frequente `mobile`, com 6.242 usuarios.
+- `country`: tem 10.000 valores preenchidos, 5 paises, pais mais frequente `BR`, com 6.986 usuarios.
+- `plan`: tem 919 valores preenchidos, 3 planos, plano mais frequente `BASIC`, com 526 compradores.
+
+Ponto importante:
+
+`plan` tem `count = 919`, e nao 10.000, porque plano so existe para quem comprou. Usuarios que visitaram ou fizeram signup sem comprar ficam com `plan` vazio, o que e esperado pela regra do funil.
+
 Fala sugerida:
 
-> Aqui eu olho os campos categoricos para entender quais canais, dispositivos, paises e planos existem, alem de verificar valores ausentes esperados, como plano nulo para quem nao comprou.
+> Aqui eu olho os campos categoricos para entender o mix da base. Organic e o canal mais comum, mobile e o dispositivo mais frequente, BR concentra a maior parte dos usuarios e BASIC e o plano mais comprado. O ponto de atencao e que `plan` aparece preenchido apenas em 919 linhas, porque so usuarios compradores possuem plano.
 
 ## Celula 11 - Secao de validacoes de qualidade
 
@@ -264,11 +310,11 @@ Abre a investigacao por dispositivo.
 
 Tipo: Codigo
 
-Consulta `vw_funnel_by_device`, trazendo taxas por `desktop` e `mobile`. Mostra a diferenca de eficiencia entre os dispositivos.
+Consulta `vw_funnel_by_device`, trazendo volume e taxas por `desktop` e `mobile`. Mostra a diferenca entre volume de usuarios e eficiencia de conversao.
 
 Fala sugerida:
 
-> Nesta consulta eu vejo a diferenca entre desktop e mobile. O ponto importante e que mobile tem muito volume, mas converte pior.
+> Nesta consulta eu vejo a diferenca entre volume e eficiencia. Mobile concentra mais usuarios, mas desktop tem taxas de conversao maiores. Entao mobile e importante nao porque converte melhor, mas porque tem muito volume e pode gerar impacto se melhorar.
 
 ## Celula 25 - Grafico por dispositivo
 
@@ -276,15 +322,22 @@ Tipo: Codigo
 
 Gera um grafico de barras agrupadas com `visit_to_signup_rate`, `visit_to_purchase_rate` e `signup_to_purchase_rate` para desktop e mobile. A paleta evita o vermelho padrao e usa cores da Conta Azul.
 
+Como ler o grafico:
+
+- As barras representam taxas de conversao, nao volume absoluto.
+- Desktop aparece maior nas tres taxas: visita para signup, visita para compra e signup para compra.
+- Mobile tem barras menores, ou seja, menor eficiencia.
+- Mesmo assim, mobile merece prioridade porque tem mais visitas na base.
+
 Fala sugerida:
 
-> Esse grafico reforca a oportunidade em mobile. Como mobile representa grande parte das visitas, pequenas melhorias na jornada podem gerar impacto relevante.
+> Esse grafico mostra que desktop converte melhor em todas as taxas. A oportunidade esta em mobile porque, apesar de converter menos, mobile concentra mais visitas. Se eu melhorar a experiencia mobile, mesmo um ganho pequeno de taxa pode virar um ganho relevante em numero absoluto de compras.
 
 ## Celula 26 - Leitura por dispositivo
 
 Tipo: Markdown
 
-Interpreta que desktop converte melhor que mobile e que, como mobile tem alto volume, melhorar essa experiencia pode gerar impacto relevante.
+Interpreta que desktop converte melhor que mobile em eficiencia, mas que mobile segue sendo prioridade por concentrar mais volume de visitas.
 
 ## Celula 27 - Secao de pais e mes
 
@@ -326,7 +379,11 @@ Fala sugerida:
 
 Tipo: Markdown
 
-Interpreta que as taxas por pais sao proximas e que setembro se destaca em taxa de compra sobre visitas e conversao pos-signup.
+Interpreta dois pontos: a tabela anterior compara os paises, enquanto o grafico mensal mostra a variacao ao longo dos meses. Setembro se destaca em taxa de compra sobre visitas e conversao pos-signup.
+
+Fala sugerida:
+
+> Nesta parte eu separo duas leituras: primeiro olho a tabela por pais para ver se algum mercado foge muito do padrao; depois olho o grafico mensal para entender a evolucao temporal. No grafico mensal, setembro aparece como o melhor mes em conversao para compra e conversao pos-signup.
 
 ## Celula 32 - Secao de NPS
 
@@ -340,9 +397,22 @@ Tipo: Codigo
 
 Consulta `vw_nps_summary` e adiciona uma linha geral. Calcula respostas, NPS medio, promotores, passivos, detratores e NPS para compradores, nao compradores e geral.
 
+Como ler a tabela:
+
+- `respostas`: quantidade de usuarios que responderam NPS.
+- `nps_medio`: media simples da nota NPS, em escala de 0 a 10.
+- `promotores`: numero real de respostas com nota maior ou igual a 9.
+- `passivos`: numero real de respostas com nota entre 7 e menor que 9.
+- `detratores`: numero real de respostas com nota menor que 7.
+- `nps`: indicador calculado como `% promotores - % detratores`, em uma escala de -100 a 100.
+
+Ponto importante:
+
+`promotores`, `passivos` e `detratores` sao contagens absolutas de respostas, nao porcentagens. O campo `nps` e o indicador percentual consolidado.
+
 Fala sugerida:
 
-> Aqui separo NPS por compradores e nao compradores. Essa separacao e essencial porque a media geral pode esconder experiencias muito diferentes.
+> Aqui separo NPS por compradores e nao compradores. Promotores, passivos e detratores sao numeros absolutos de respostas. O NPS calculado e o percentual de promotores menos o percentual de detratores. Essa separacao e essencial porque a media geral pode esconder experiencias muito diferentes.
 
 ## Celula 34 - Grafico de NPS por segmento
 

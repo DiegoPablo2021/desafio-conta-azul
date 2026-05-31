@@ -18,6 +18,18 @@ if str(ROOT_DIR) not in sys.path:
 from src.config import OUTPUT_DOC_DIR
 
 
+def configure_styles(document: DocxDocument) -> None:
+    for style_name in ["Normal", "List Bullet", "Title", "Heading 1", "Heading 2", "Heading 3"]:
+        style = document.styles[style_name]
+        style.font.name = "Calibri"
+        style.font.size = Pt(10)
+
+    document.styles["Title"].font.size = Pt(18)
+    document.styles["Heading 1"].font.size = Pt(14)
+    document.styles["Heading 2"].font.size = Pt(12)
+    document.styles["Heading 3"].font.size = Pt(11)
+
+
 def add_heading(document: DocxDocument, text: str, level: int = 1) -> None:
     heading = document.add_heading(text, level=level)
     heading.alignment = WD_ALIGN_PARAGRAPH.LEFT
@@ -34,6 +46,7 @@ def add_paragraph(document: DocxDocument, text: str) -> None:
 
 def build_document() -> DocxDocument:
     document = Document()
+    configure_styles(document)
     section = document.sections[0]
     section.top_margin = Inches(0.45)
     section.bottom_margin = Inches(0.45)

@@ -19,6 +19,18 @@ if str(ROOT_DIR) not in sys.path:
 from src.config import DOCS_DIR, OUTPUT_DOC_DIR
 
 
+def configure_styles(document: "DocxDocument") -> None:
+    for style_name in ["Normal", "List Bullet", "Title", "Heading 1", "Heading 2", "Heading 3"]:
+        style = document.styles[style_name]
+        style.font.name = "Calibri"
+        style.font.size = Pt(10)
+
+    document.styles["Title"].font.size = Pt(18)
+    document.styles["Heading 1"].font.size = Pt(14)
+    document.styles["Heading 2"].font.size = Pt(12)
+    document.styles["Heading 3"].font.size = Pt(11)
+
+
 def clean_inline_markdown(text: str) -> str:
     text = text.replace("`", "")
     text = re.sub(r"\*\*(.*?)\*\*", r"\1", text)
@@ -64,13 +76,14 @@ def add_code(document: "DocxDocument", text: str) -> None:
     paragraph.paragraph_format.left_indent = Inches(0.2)
     paragraph.paragraph_format.space_after = Pt(4)
     run = paragraph.add_run(text.strip())
-    run.font.name = "Consolas"
+    run.font.name = "Calibri"
     run.font.size = Pt(9)
 
 
 def build_document() -> "DocxDocument":
     source_path = DOCS_DIR / "guia_celulas_notebook.md"
     document = Document()
+    configure_styles(document)
     section = document.sections[0]
     section.top_margin = Inches(0.5)
     section.bottom_margin = Inches(0.5)
