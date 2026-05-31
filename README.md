@@ -65,6 +65,10 @@ Principais leituras:
 
 ## Arquitetura
 
+![Arquitetura End-to-End do projeto](docs/assets/image-end-to-end.png)
+
+O fluxograma acima resume o caminho da solucao: o CSV original e carregado e tratado com Pandas, as metricas sao modeladas em SQL com DuckDB, o notebook documenta a investigacao analitica, o Streamlit apresenta o dashboard executivo e os scripts geram documentos Word localmente.
+
 ```text
 CSV original
   -> Pandas: carga, profiling, tipagem, campos derivados e validacoes
@@ -85,6 +89,9 @@ desafio-conta-azul/
   .streamlit/
     config.toml
   docs/
+    assets/
+      image-end-to-end.png
+      arquitetura_pipeline_dados.png
     documentacao_tecnica_funcional.md
     guia_celulas_notebook.md
     resumo_executivo.md

@@ -487,6 +487,9 @@ desafio-conta-azul/
     02_funnel_analysis.sql
     03_nps_analysis.sql
   docs/
+    assets/
+      image-end-to-end.png
+      arquitetura_pipeline_dados.png
     documentacao_tecnica_funcional.md
     guia_celulas_notebook.md
     resumo_executivo.md
@@ -503,6 +506,7 @@ Responsabilidades principais:
 - `src/metrics.py`: funcoes de consulta e metricas usadas pelo dashboard.
 - `sql/`: consultas SQL reproduziveis para avaliacao tecnica.
 - `docs/`: documentacao tecnica e resumo executivo em Markdown.
+- `docs/assets/`: imagens usadas na documentacao e no README.
 - `docs/guia_celulas_notebook.md`: explicacao celula a celula do notebook de EDA.
 - `scripts/`: geradores opcionais dos documentos Word em `output/doc/`.
 - `output/doc/`: pasta de saida local criada pelos scripts; os `.docx` gerados nao precisam ser versionados.
