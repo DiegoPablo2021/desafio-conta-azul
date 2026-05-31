@@ -491,8 +491,6 @@ desafio-conta-azul/
       image-end-to-end.png
       arquitetura_pipeline_dados.png
     documentacao_tecnica_funcional.md
-    guia_celulas_notebook.md
-    resumo_executivo.md
   output/
     doc/
       resumo_executivo_conta_azul.docx
@@ -508,9 +506,8 @@ Responsabilidades principais:
 - `src/data_pipeline.py`: leitura do CSV, profiling, tratamento, validacoes e registro de views no DuckDB.
 - `src/metrics.py`: funcoes de consulta e metricas usadas pelo dashboard.
 - `sql/`: consultas SQL reproduziveis para avaliacao tecnica.
-- `docs/`: documentacao tecnica e resumo executivo em Markdown.
+- `docs/`: documentacao tecnica e imagens usadas no README.
 - `docs/assets/`: imagens usadas na documentacao e no README.
-- `docs/guia_celulas_notebook.md`: explicacao celula a celula do notebook de EDA.
 - `scripts/`: geradores opcionais dos documentos Word em `output/doc/`.
 - `output/doc/`: pasta de saida local criada pelos scripts. O resumo executivo em Word e versionado como entregavel formal; os demais `.docx` de apoio ficam ignorados.
 
@@ -1337,8 +1334,6 @@ desafio-conta-azul/
     03_nps_analysis.sql
   docs/
     documentacao_tecnica_funcional.md
-    guia_celulas_notebook.md
-    resumo_executivo.md
   scripts/
     export_summary_docx.py
     export_presentation_script_docx.py
@@ -1407,11 +1402,7 @@ Formas recomendadas de abrir:
 Start-Process .\output\doc\resumo_executivo_conta_azul.docx
 ```
 
-Para leitura direta no VS Code, usar a versao Markdown:
-
-```text
-docs/resumo_executivo.md
-```
+O resumo executivo oficial do case fica em Word. Para leitura tecnica no VS Code, use a documentacao completa em `docs/documentacao_tecnica_funcional.md`.
 
 ### 16.3 Observacao sobre pip no ambiente local
 
@@ -1516,8 +1507,6 @@ Os dados indicam que o crescimento mais promissor passa por:
 | `sql/01_create_views.sql` | Criado | Views logicas de referencia |
 | `sql/02_funnel_analysis.sql` | Criado | Consultas de funil |
 | `sql/03_nps_analysis.sql` | Criado | Consultas de NPS |
-| `docs/resumo_executivo.md` | Criado | Versao Markdown do resumo executivo |
-| `docs/guia_celulas_notebook.md` | Criado | Guia explicando cada celula do notebook de EDA |
 | `scripts/export_summary_docx.py` | Criado | Gerador do resumo executivo em Word |
 | `scripts/export_presentation_script_docx.py` | Criado | Gerador do roteiro de apresentacao em Word, com textos curtos, bullets e blocos de `Fala sugerida` para explicar o dashboard Streamlit |
 | `scripts/export_notebook_guide_docx.py` | Criado | Gerador da versao Word do guia celula a celula do notebook |
@@ -1557,7 +1546,6 @@ saas_funnel_case_10k_refresh_(4)_(2).csv
 src/
 sql/
 notebooks/01_eda_funil_saas.ipynb
-docs/resumo_executivo.md
 docs/documentacao_tecnica_funcional.md
 output/doc/resumo_executivo_conta_azul.docx
 ```
@@ -1567,7 +1555,7 @@ Essa composicao cobre:
 - Consultas SQL e views reproduziveis.
 - Notebook de investigacao analitica.
 - Dashboard Streamlit.
-- Resumo executivo em Markdown e Word.
+- Resumo executivo em Word.
 - Documentacao tecnica e instrucoes de execucao.
 
 ### 22.2 Arquivos que nao precisam ser enviados
@@ -1580,7 +1568,6 @@ Essa composicao cobre:
 | `.ipynb_checkpoints/` | Checkpoints automaticos do Jupyter |
 | `output/doc/roteiro_apresentacao_conta_azul.docx` | Material pessoal de apoio para apresentacao |
 | `output/doc/guia_celulas_notebook.docx` | Material pessoal de apoio para explicar o notebook |
-| `docs/guia_celulas_notebook.md` | Material de apoio para explicar o notebook; enviar apenas se quiser documentacao extra |
 | Prints, temporarios e copias antigas | Nao agregam valor e podem confundir a avaliacao |
 
 O roteiro de apresentacao e o guia do notebook devem ser usados pelo candidato durante a apresentacao, mas nao sao obrigatorios como entrega formal.
@@ -1637,7 +1624,7 @@ Essa combinacao entrega uma resposta aderente ao case, tecnicamente defensavel e
 
 - README reestruturado como documentacao oficial do projeto, com foco em objetivo, stack, arquitetura, execucao, dashboard, SQL, qualidade e documentacao.
 - Removidas do README as orientacoes pessoais de envio/nao envio para manter o arquivo com aparencia profissional.
-- Guia celula a celula do notebook restaurado em `docs/guia_celulas_notebook.md`, mantendo o script `scripts/export_notebook_guide_docx.py` funcional.
+- Guia celula a celula passou a ser gerado diretamente pelo script `scripts/export_notebook_guide_docx.py`, sem manter uma copia Markdown redundante em `docs/`.
 - Arquivo `.gitignore` criado para evitar caches Python, checkpoints Jupyter e arquivos temporarios.
 - Resumo executivo em Word mantido no versionamento como entregavel formal; documentos Word de apoio seguem ignorados no Git.
 - Repositorio GitHub criado em `https://github.com/DiegoPablo2021/desafio-conta-azul`.

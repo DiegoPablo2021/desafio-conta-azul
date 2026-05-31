@@ -93,8 +93,6 @@ desafio-conta-azul/
       image-end-to-end.png
       arquitetura_pipeline_dados.png
     documentacao_tecnica_funcional.md
-    guia_celulas_notebook.md
-    resumo_executivo.md
   output/
     doc/
       resumo_executivo_conta_azul.docx
@@ -262,14 +260,12 @@ Na base completa, as regras criticas do funil nao apresentaram inconsistencias.
 Documentos em Markdown:
 
 - `docs/documentacao_tecnica_funcional.md`: documentacao tecnica e funcional completa.
-- `docs/resumo_executivo.md`: versao Markdown do resumo executivo.
-- `docs/guia_celulas_notebook.md`: guia celula a celula do notebook.
 
 O resumo executivo tambem esta disponivel em Word:
 
 - `output/doc/resumo_executivo_conta_azul.docx`
 
-Os demais documentos Word podem ser gerados localmente pelos scripts em `output/doc/`, mas sao tratados como saidas de apoio e nao precisam ficar versionados no repositorio.
+Os documentos Word de apoio, como o roteiro de apresentacao e o guia do notebook, podem ser gerados localmente pelos scripts em `output/doc/`, mas sao tratados como saidas de apoio e nao precisam ficar versionados no repositorio.
 
 Arquivos `.docx` devem ser abertos no Microsoft Word ou aplicativo equivalente. Ao abrir um `.docx` como texto no VS Code, o conteudo aparece como binario ilegivel.
 
