@@ -1634,6 +1634,7 @@ Essa combinacao entrega uma resposta aderente ao case, tecnicamente defensavel e
 - Dependencias travadas em `requirements.txt` para reduzir risco de quebra no deploy.
 - Geradores Word ajustados para padronizar a fonte Calibri nos documentos criados localmente.
 - Guia celula a celula atualizado com explicacoes adicionais sobre base original vs base tratada, profiling categorico, grafico por dispositivo, grafico mensal e NPS.
+- Guia do notebook simplificado para funcionar como cola de apresentacao, omitindo celulas Markdown que ja sao autoexplicativas e removendo marcadores de tipo de celula.
 
 ### 23.2 Validacoes finais executadas
 

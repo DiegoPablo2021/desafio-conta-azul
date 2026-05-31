@@ -1,451 +1,363 @@
-# Guia celula a celula - Notebook `01_eda_funil_saas.ipynb`
+# Guia de apoio - Notebook `01_eda_funil_saas.ipynb`
 
-Este guia explica o papel de cada celula do notebook de EDA criado para o desafio Conta Azul.
-
-## Como usar este guia na apresentacao
-
-Use este documento como apoio de fala. A ideia nao e ler tudo palavra por palavra, mas ter uma explicacao curta para cada bloco do notebook.
+Use este guia como uma cola de apresentacao. A ideia e explicar os resultados principais do notebook sem ler cada celula palavra por palavra.
 
 Fala de abertura sugerida:
 
 > Este notebook mostra a parte investigativa da analise. O dashboard traz a leitura executiva, mas aqui eu mostro como os dados foram carregados, validados, transformados e analisados antes de chegar nas recomendacoes.
 
-## Falas prontas para pontos que podem gerar duvida
+## Pontos que podem gerar duvida
 
 ### Quando aparecer `WindowsPath(...)`
 
-O que significa:
-
-`WindowsPath('C:/Projetos/desafio-conta-azul/saas_funnel_case_10k_refresh_(4)_(2).csv')` e apenas o caminho local do arquivo CSV no Windows.
+`WindowsPath(...)` e apenas o caminho local do CSV no Windows.
 
 Fala sugerida:
 
-> Essa primeira celula configura o ambiente do notebook e confirma qual arquivo CSV sera usado na analise. O retorno `WindowsPath` nao e erro; ele apenas mostra o caminho local do arquivo no Windows.
+> Esse retorno nao e erro. Ele apenas confirma o caminho do arquivo CSV usado na analise.
 
 ### Quando aparecer `(10000, 12)`
 
-O que significa:
+Esse resultado vem de `raw.shape` e representa:
 
-Esse resultado vem de `raw.shape`. Em Pandas, `shape` retorna `(linhas, colunas)`.
+- `10000`: linhas da base original.
+- `12`: colunas originais do CSV.
 
 Fala sugerida:
 
-> Aqui eu confiro a volumetria original da base. O resultado `(10000, 12)` significa que o CSV tem 10.000 linhas e 12 colunas, exatamente o esperado pelo enunciado do desafio.
+> Aqui eu confirmo que o CSV original tem 10.000 linhas e 12 colunas, exatamente a volumetria esperada para o desafio.
 
 ### Quando o profiling mostrar `colunas = 17`
 
-O que significa:
+O CSV original tem 12 colunas. Depois do tratamento, a base analitica ganha campos derivados:
 
-O CSV original tem 12 colunas. Depois do tratamento inicial, o dataframe `df` passa a ter colunas derivadas, como `visit_month`, `signup_date`, `purchase_date`, `funnel_stage` e `nps_class`. Por isso o profiling da base tratada mostra 17 colunas.
+- `visit_month`
+- `signup_date`
+- `purchase_date`
+- `funnel_stage`
+- `nps_class`
 
 Fala sugerida:
 
-> Aqui a diferenca e intencional: o arquivo original tem 12 colunas, mas a base analitica usada no notebook ganhou campos derivados para facilitar as analises de funil, tempo e NPS. Entao `10000 x 12` e o formato original do CSV, enquanto `10000 x 17` e a base ja preparada para analise.
+> A diferenca e intencional: 12 colunas e o formato original do CSV; 17 colunas e a base ja preparada para analise, com campos derivados de data, funil e NPS.
 
 ### Quando aparecer `NaN`
 
-O que significa:
+`NaN` significa valor ausente ou nao aplicavel.
 
-`NaN` representa valor ausente ou nao aplicavel. No funil, isso e esperado quando o usuario nao avancou para determinada etapa.
+No funil, isso e esperado:
 
-Fala sugerida:
-
-> Esses `NaN` nao indicam necessariamente erro. Por exemplo, se o usuario visitou mas nao fez signup, nao existe `days_to_signup`. Se nao comprou, nao existe plano nem `days_to_purchase`. Entao esses nulos sao esperados pela regra de negocio e foram validados antes das analises.
-
-### Quando explicar as views DuckDB
-
-Fala sugerida:
-
-> Depois do tratamento em Pandas, eu registro a base tratada no DuckDB como `stg_funnel_users` e crio views analiticas. Isso deixa as metricas reproduziveis em SQL, evitando calculos manuais espalhados pelo notebook ou pelo dashboard.
-
-### Quando explicar por que separar NPS de compradores e nao compradores
+- quem nao fez signup nao tem `days_to_signup`;
+- quem nao comprou nao tem `plan`;
+- quem nao comprou nao tem `days_to_purchase`;
+- quem nao respondeu NPS nao tem `nps_score`.
 
 Fala sugerida:
 
-> Eu separei o NPS entre compradores e nao compradores porque a media geral poderia esconder comportamentos diferentes. Compradores tem NPS bem mais positivo, enquanto nao compradores tem NPS negativo, o que sugere friccao ou desalinhamento de valor antes da compra.
-
-## Celula 1 - Introducao do notebook
-
-Tipo: Markdown
-
-Explica o objetivo do notebook: demonstrar a investigacao analitica antes do dashboard, cobrindo leitura do CSV, profiling, validacoes, funil, segmentos, NPS, graficos e conclusoes.
-
-Fala sugerida:
-
-> Comeco o notebook deixando claro que ele e a trilha de investigacao. Ele nao substitui o dashboard; ele mostra o raciocinio usado para chegar nos achados.
+> Esses nulos nao indicam erro por si so. Eles refletem a regra do funil: se o usuario nao avancou para uma etapa, alguns campos ficam naturalmente vazios.
 
 ## Celula 2 - Imports, caminhos e configuracao visual
 
-Tipo: Codigo
+Esta celula prepara o ambiente do notebook:
 
-Importa bibliotecas principais (`Path`, `sys`, `duckdb`, `pandas`, `plotly.express`, `plotly.io`), define o caminho raiz do projeto, localiza o CSV original e configura a paleta visual `CONTA_AZUL_COLORS`, inspirada nas cores da Conta Azul. Tambem define o renderer `vscode` para os graficos Plotly aparecerem dentro do VS Code.
-
-Fala sugerida:
-
-> Aqui preparo o ambiente: importo as bibliotecas, encontro automaticamente a raiz do projeto, aponto para o CSV e configuro a paleta visual inspirada na Conta Azul. Assim o notebook fica reproduzivel mesmo se eu abrir pela pasta raiz ou pela pasta `notebooks`.
-
-## Celula 3 - Secao de leitura do CSV
-
-Tipo: Markdown
-
-Abre a primeira etapa analitica: leitura do arquivo CSV com Pandas.
+- importa as bibliotecas;
+- identifica a raiz do projeto;
+- aponta para o CSV;
+- configura as cores inspiradas na Conta Azul;
+- define o renderer dos graficos Plotly para o VS Code.
 
 Fala sugerida:
 
-> A partir daqui comeco a trabalhar com a base original do case.
+> Aqui preparo o ambiente para deixar a analise reproduzivel. O notebook encontra o CSV, carrega as bibliotecas e configura a identidade visual dos graficos.
 
 ## Celula 4 - Leitura e amostra inicial
 
-Tipo: Codigo
+Esta celula le o CSV com Pandas e mostra as primeiras linhas.
 
-Le o arquivo `saas_funnel_case_10k_refresh_(4)_(2).csv` com `pd.read_csv()` e mostra as primeiras linhas com `head()`. Serve para confirmar que o arquivo foi carregado e visualizar as colunas originais.
+Ela ajuda a confirmar:
 
-Fala sugerida:
-
-> Primeiro leio o CSV e olho as primeiras linhas para entender a estrutura original: identificador do usuario, data da visita, canal, dispositivo, pais, signup, purchase, plano, tempos e NPS.
-
-## Celula 5 - Dimensao da base
-
-Tipo: Codigo
-
-Mostra o tamanho da base com `raw.shape`. A expectativa do desafio e uma base de 10.000 linhas.
+- se o arquivo foi carregado;
+- quais sao as colunas originais;
+- como os dados aparecem antes de qualquer tratamento.
 
 Fala sugerida:
 
-> Aqui confirmo que a base tem 10.000 linhas e 12 colunas. Isso valida que estou trabalhando com a volumetria esperada do enunciado.
+> Primeiro eu leio o CSV e olho uma amostra da base para entender a estrutura original: usuario, data da visita, canal, dispositivo, pais, signup, compra, plano, tempos e NPS.
+
+## Celula 5 - Dimensao da base original
+
+Mostra o tamanho do CSV original.
+
+Resultado:
+
+- `linhas = 10000`
+- `colunas = 12`
+
+Fala sugerida:
+
+> Aqui valido a volumetria original: 10.000 linhas e 12 colunas. Isso confirma que estou analisando a base completa do case.
+
+## Celula 7 - Tratamento e campos derivados
+
+Esta celula cria a base analitica `df`.
+
+Principais tratamentos:
+
+- converte `dt_visit` para data;
+- ajusta tipos numericos;
+- cria `visit_month`;
+- cria datas estimadas de signup e compra;
+- cria a etapa final do funil;
+- classifica o NPS como promotor, passivo ou detrator.
+
+Fala sugerida:
+
+> Aqui eu transformo o CSV original em uma base analitica. A ideia nao e alterar o dado bruto, mas criar campos que facilitem as analises de funil, tempo e NPS.
+
+## Celula 9 - Profiling da base tratada
+
+Esta tabela resume a base depois do tratamento.
 
 Resultado esperado:
 
-- `linhas = 10000`: quantidade de usuarios/visitas na base original.
-- `colunas = 12`: quantidade de campos originais do CSV antes do tratamento.
-
-## Celula 6 - Secao de tratamento inicial
-
-Tipo: Markdown
-
-Explica que a base tem grao de uma linha por usuario e que serao criados campos derivados para facilitar analise de funil, datas e NPS.
-
-Fala sugerida:
-
-> Antes de calcular metricas, declaro o grao da base: uma linha por usuario visitante. Isso e importante para nao misturar contagem de usuarios com eventos.
-
-## Celula 7 - Tratamento, tipagem e campos derivados
-
-Tipo: Codigo
-
-Cria uma copia da base original, converte `dt_visit` para data, ajusta campos numericos nullable, cria `visit_month`, `signup_date`, `purchase_date`, `funnel_stage` e `nps_class`. Essa celula prepara a base para analise sem alterar o CSV original.
+- `linhas = 10000`
+- `colunas = 17`
+- `usuarios_unicos = 10000`
+- `usuarios_duplicados = 0`
+- `data_minima_visita = 2025-06-01`
+- `data_maxima_visita = 2025-10-30`
+- `canais = 5`
+- `dispositivos = 2`
+- `paises = 5`
+- `planos = 3`
 
 Fala sugerida:
 
-> Aqui eu preparo a base analitica. Converto datas, trato campos numericos e crio variaveis derivadas para facilitar a leitura do funil e do NPS. A base original permanece preservada.
-
-## Celula 8 - Secao de profiling
-
-Tipo: Markdown
-
-Inicia a etapa de profiling da base.
-
-Fala sugerida:
-
-> Depois da preparacao, faco um profiling para entender volume, periodo e cardinalidade dos principais campos.
-
-## Celula 9 - Tabela de profiling
-
-Tipo: Codigo
-
-Cria uma tabela resumo com quantidade de linhas, colunas, usuarios unicos, duplicidades, periodo de visitas, quantidade de canais, dispositivos, paises e planos. Serve para validar a volumetria e o escopo da base.
-
-Fala sugerida:
-
-> Essa tabela confirma que tenho 10.000 usuarios unicos, sem duplicidade de `user_id`, cobrindo visitas de junho a outubro de 2025. Ela tambem mostra 17 colunas porque aqui ja estou olhando a base tratada, com campos derivados criados na etapa anterior.
-
-Resultado esperado:
-
-- `linhas = 10000`: total de registros analisados.
-- `colunas = 17`: base tratada, ja com campos derivados.
-- `usuarios_unicos = 10000`: cada linha representa um usuario unico.
-- `usuarios_duplicados = 0`: nao ha duplicidade de usuario.
-- `data_minima_visita = 2025-06-01`.
-- `data_maxima_visita = 2025-10-30`.
-- `canais = 5`: organic, paid, referral, social e email.
-- `dispositivos = 2`: desktop e mobile.
-- `paises = 5`: BR, MX, AR, CL e US.
-- `planos = 3`: BASIC, PRO e PREMIUM.
+> Essa tabela mostra que a base esta consistente: tenho 10.000 usuarios unicos, sem duplicidade, cobrindo visitas de junho a outubro de 2025. As 17 colunas aparecem porque a base ja esta tratada e enriquecida com campos derivados.
 
 ## Celula 10 - Perfil das categorias
 
-Tipo: Codigo
+Codigo da celula:
 
-Usa `describe(include='all')` para resumir as colunas categoricas principais: `channel`, `device`, `country` e `plan`. Ajuda a entender distribuicoes, categorias mais frequentes e valores ausentes.
+```python
+df[['channel', 'device', 'country', 'plan']].describe(include='all')
+```
 
 Como ler a tabela:
 
-- `count`: quantidade de valores preenchidos na coluna.
+- `count`: quantidade de valores preenchidos.
 - `unique`: quantidade de categorias diferentes.
 - `top`: categoria mais frequente.
-- `freq`: quantas vezes a categoria mais frequente aparece.
+- `freq`: quantidade de vezes em que a categoria mais frequente aparece.
 
-Resultado esperado:
+Resultado principal:
 
-- `channel`: tem 10.000 valores preenchidos, 5 canais diferentes, canal mais frequente `organic`, com 4.271 usuarios.
-- `device`: tem 10.000 valores preenchidos, 2 dispositivos, dispositivo mais frequente `mobile`, com 6.242 usuarios.
-- `country`: tem 10.000 valores preenchidos, 5 paises, pais mais frequente `BR`, com 6.986 usuarios.
-- `plan`: tem 919 valores preenchidos, 3 planos, plano mais frequente `BASIC`, com 526 compradores.
+- `channel`: canal mais frequente e `organic`, com 4.271 usuarios.
+- `device`: dispositivo mais frequente e `mobile`, com 6.242 usuarios.
+- `country`: pais mais frequente e `BR`, com 6.986 usuarios.
+- `plan`: plano mais frequente e `BASIC`, com 526 compradores.
 
 Ponto importante:
 
-`plan` tem `count = 919`, e nao 10.000, porque plano so existe para quem comprou. Usuarios que visitaram ou fizeram signup sem comprar ficam com `plan` vazio, o que e esperado pela regra do funil.
+`plan` tem `count = 919`, e nao 10.000, porque plano so existe para quem comprou.
 
 Fala sugerida:
 
-> Aqui eu olho os campos categoricos para entender o mix da base. Organic e o canal mais comum, mobile e o dispositivo mais frequente, BR concentra a maior parte dos usuarios e BASIC e o plano mais comprado. O ponto de atencao e que `plan` aparece preenchido apenas em 919 linhas, porque so usuarios compradores possuem plano.
+> Esta tabela mostra o mix da base. Organic e o canal mais comum, mobile e o dispositivo mais frequente, BR concentra a maior parte dos usuarios e BASIC e o plano mais comprado. O plano aparece em apenas 919 linhas porque so usuarios compradores possuem plano.
 
-## Celula 11 - Secao de validacoes de qualidade
+## Celula 12 - Validacoes de qualidade
 
-Tipo: Markdown
+Esta celula valida se as regras principais do funil fazem sentido.
 
-Introduz as regras de qualidade usadas para garantir que o funil nao tenha inconsistencias basicas.
+Ela verifica, por exemplo:
 
-## Celula 12 - Validacoes de consistencia
-
-Tipo: Codigo
-
-Cria uma tabela de checks para identificar problemas como compra sem signup, compra sem plano, plano sem compra, dias preenchidos indevidamente, NPS preenchido sem resposta, NPS fora do intervalo e respostas de NPS de nao compradores. Mostra que a base e confiavel para analise.
-
-Fala sugerida:
-
-> Antes de tirar conclusoes, valido regras criticas do funil. O objetivo e garantir que nao existem compras sem signup, compras sem plano ou NPS fora do intervalo. Isso aumenta a confianca nas metricas.
-
-## Celula 13 - Secao DuckDB e SQL
-
-Tipo: Markdown
-
-Explica que, a partir dali, o notebook usa DuckDB para calcular metricas em SQL local.
+- compra sem signup;
+- compra sem plano;
+- plano sem compra;
+- NPS fora do intervalo;
+- datas ou tempos inconsistentes;
+- usuarios duplicados.
 
 Fala sugerida:
 
-> Nesta etapa eu trago SQL para a analise. O DuckDB permite executar consultas localmente, sem precisar de BigQuery, Snowflake ou outro ambiente externo.
+> Antes de tirar conclusoes, eu valido a qualidade dos dados. As regras criticas deram zero inconsistencias, entao as metricas do funil estao confiaveis.
 
-## Celula 14 - Conexao DuckDB e criacao das views
+## Celula 14 - DuckDB e views analiticas
 
-Tipo: Codigo
+Aqui a base tratada e registrada no DuckDB como `stg_funnel_users`.
 
-Cria uma conexao DuckDB em memoria, registra o dataframe tratado como `stg_funnel_users`, executa `sql/01_create_views.sql` e lista as views criadas. Essa celula conecta Pandas e SQL.
-
-Fala sugerida:
-
-> Aqui a base tratada vira uma staging no DuckDB. Em seguida eu crio views analiticas para funil, canais, dispositivos, paises, meses, planos e NPS. Isso deixa as consultas reproduziveis.
-
-## Celula 15 - Secao de funil geral
-
-Tipo: Markdown
-
-Abre a analise do funil geral.
-
-## Celula 16 - Consulta do funil geral
-
-Tipo: Codigo
-
-Consulta `vw_funnel_overall` para trazer visitas, signups, compras, respostas de NPS e taxas principais. Essa e a tabela base para entender a performance geral.
+Depois disso, o notebook executa `sql/01_create_views.sql` para criar views analiticas.
 
 Fala sugerida:
 
-> Aqui calculo o funil geral. Essa tabela resume quantos usuarios visitaram, quantos fizeram signup, quantos compraram e quais sao as taxas principais de conversao.
+> Aqui eu trago SQL para a analise. Em vez de calcular tudo manualmente no notebook, registro a base no DuckDB e crio views reproduziveis para funil, segmentos, planos e NPS.
+
+## Celula 16 - Funil geral
+
+Consulta a view `vw_funnel_overall`.
+
+Principais resultados:
+
+- visitas: 10.000;
+- signups: 2.983;
+- compras: 919;
+- visit to signup: 29,83%;
+- visit to purchase: 9,19%;
+- signup to purchase: 30,81%.
+
+Fala sugerida:
+
+> Aqui esta o resumo do funil. De 10.000 visitantes, 2.983 criaram conta e 919 compraram. A conversao final sobre visitas foi de 9,19%.
 
 ## Celula 17 - Grafico de funil
 
-Tipo: Codigo
+Mostra visualmente a queda entre:
 
-Monta um dataframe com as etapas `Visitas`, `Signups` e `Compras`, e gera um grafico de funil com Plotly. Mostra visualmente a queda entre as etapas.
-
-Fala sugerida:
-
-> O grafico de funil ajuda a visualizar rapidamente onde ocorre a maior perda. Ele deixa claro que a queda de visita para signup e muito forte.
-
-## Celula 18 - Leitura do funil geral
-
-Tipo: Markdown
-
-Interpreta o funil: 10.000 visitas, 2.983 signups e 919 compras, destacando que os principais gargalos estao antes do signup e depois do signup.
-
-## Celula 19 - Secao de analise por canal
-
-Tipo: Markdown
-
-Abre a investigacao por canal de origem.
-
-## Celula 20 - Consulta por canal
-
-Tipo: Codigo
-
-Consulta `vw_funnel_by_channel`, ordenando por taxa de compra sobre visitas. Permite comparar volume e eficiencia entre `organic`, `paid`, `referral`, `social` e `email`.
+- visitas;
+- signups;
+- compras.
 
 Fala sugerida:
 
-> Aqui eu comparo os canais nao apenas por volume, mas por eficiencia. Isso e importante porque um canal pode trazer muito trafego e ainda assim converter mal.
+> O grafico deixa claro que existe uma perda grande antes do signup e outra perda relevante depois do signup.
+
+## Celula 20 - Analise por canal
+
+Compara volume e eficiencia por canal.
+
+Leituras principais:
+
+- `referral` tem melhor eficiencia;
+- `email` tambem performa bem;
+- `organic` combina volume e conversao;
+- `paid` e `social` precisam de otimizacao.
+
+Fala sugerida:
+
+> Aqui eu nao olho so volume. Eu comparo tambem eficiencia. Referral nao e o maior canal em volume, mas e o melhor em conversao.
 
 ## Celula 21 - Grafico por canal
 
-Tipo: Codigo
-
-Cria um grafico de barras horizontais para comparar `visit_to_purchase_rate` por canal. Ajuda a evidenciar que `referral` e `email` sao mais eficientes e `paid/social` menos eficientes.
+Mostra a taxa `visit_to_purchase_rate` por canal.
 
 Fala sugerida:
 
-> Este grafico mostra que referral e email sao os canais com maior eficiencia de compra, enquanto paid e social precisam de investigacao antes de escalar investimento.
-
-## Celula 22 - Leitura por canal
-
-Tipo: Markdown
-
-Interpreta os canais: `referral` e `email` sao mais eficientes, `organic` combina escala e conversao, e `paid/social` precisam de otimizacao.
-
-## Celula 23 - Secao de analise por dispositivo
-
-Tipo: Markdown
-
-Abre a investigacao por dispositivo.
+> Este grafico ajuda a enxergar quais canais transformam visita em compra com mais eficiencia. Referral aparece como destaque positivo, enquanto paid e social merecem investigacao.
 
 ## Celula 24 - Consulta por dispositivo
 
-Tipo: Codigo
+Compara desktop e mobile.
 
-Consulta `vw_funnel_by_device`, trazendo volume e taxas por `desktop` e `mobile`. Mostra a diferenca entre volume de usuarios e eficiencia de conversao.
+Ponto principal:
 
-Fala sugerida:
-
-> Nesta consulta eu vejo a diferenca entre volume e eficiencia. Mobile concentra mais usuarios, mas desktop tem taxas de conversao maiores. Entao mobile e importante nao porque converte melhor, mas porque tem muito volume e pode gerar impacto se melhorar.
-
-## Celula 25 - Grafico por dispositivo
-
-Tipo: Codigo
-
-Gera um grafico de barras agrupadas com `visit_to_signup_rate`, `visit_to_purchase_rate` e `signup_to_purchase_rate` para desktop e mobile. A paleta evita o vermelho padrao e usa cores da Conta Azul.
-
-Como ler o grafico:
-
-- As barras representam taxas de conversao, nao volume absoluto.
-- Desktop aparece maior nas tres taxas: visita para signup, visita para compra e signup para compra.
-- Mobile tem barras menores, ou seja, menor eficiencia.
-- Mesmo assim, mobile merece prioridade porque tem mais visitas na base.
+- mobile tem mais volume;
+- desktop tem melhores taxas de conversao.
 
 Fala sugerida:
 
-> Esse grafico mostra que desktop converte melhor em todas as taxas. A oportunidade esta em mobile porque, apesar de converter menos, mobile concentra mais visitas. Se eu melhorar a experiencia mobile, mesmo um ganho pequeno de taxa pode virar um ganho relevante em numero absoluto de compras.
+> Aqui aparece uma diferenca importante entre volume e eficiencia. Mobile concentra mais usuarios, mas desktop converte melhor.
 
-## Celula 26 - Leitura por dispositivo
+## Celula 25 - Grafico de taxas por dispositivo
 
-Tipo: Markdown
+As barras representam taxas, nao volume absoluto.
 
-Interpreta que desktop converte melhor que mobile em eficiencia, mas que mobile segue sendo prioridade por concentrar mais volume de visitas.
+Desktop aparece melhor nas tres taxas:
 
-## Celula 27 - Secao de pais e mes
+- visita para signup;
+- visita para compra;
+- signup para compra.
 
-Tipo: Markdown
-
-Abre a analise geografica e temporal.
-
-## Celula 28 - Consulta por pais
-
-Tipo: Codigo
-
-Consulta `vw_funnel_by_country`, ordenando por volume de visitas. Permite avaliar se algum pais tem comportamento muito diferente.
+Mesmo assim, mobile e importante porque concentra mais visitas.
 
 Fala sugerida:
 
-> Aqui verifico se existe algum pais com comportamento muito diferente. A maior parte da base esta no Brasil, mas tambem olho outros paises para identificar possiveis desvios.
+> O grafico mostra que desktop converte melhor em todas as taxas. A oportunidade esta em mobile porque ele tem muito volume; se a conversao mobile melhorar um pouco, o impacto absoluto pode ser relevante.
 
-## Celula 29 - Consulta mensal
+## Celula 28 - Analise por pais
 
-Tipo: Codigo
+Compara a performance por pais.
 
-Consulta `vw_funnel_by_month`, trazendo a evolucao mensal das taxas do funil.
+Leitura principal:
+
+- BR concentra a maior parte da base;
+- as taxas entre paises sao relativamente proximas;
+- nao ha um pais com desvio extremo que mude toda a leitura do funil.
 
 Fala sugerida:
 
-> Aqui olho a evolucao mensal para entender se a conversao mudou ao longo do tempo, o que poderia indicar efeito de campanha, sazonalidade ou mudanca no produto.
+> Aqui eu verifico se algum pais foge muito do padrao. O Brasil concentra o maior volume, mas as taxas entre paises ficam relativamente proximas.
+
+## Celula 29 - Tabela mensal
+
+Mostra a evolucao mensal das metricas do funil.
+
+Fala sugerida:
+
+> Esta tabela ajuda a entender se houve mudanca de comportamento ao longo do tempo, como efeito de campanha, sazonalidade ou melhoria de produto.
 
 ## Celula 30 - Grafico mensal
 
-Tipo: Codigo
+Mostra a evolucao das taxas ao longo dos meses.
 
-Gera um grafico de linhas com as taxas de conversao ao longo dos meses. Ajuda a identificar meses com melhor ou pior performance.
+Leitura principal:
 
-Fala sugerida:
-
-> O grafico mensal mostra que setembro foi um periodo mais forte em conversao para compra e conversao pos-signup.
-
-## Celula 31 - Leitura por pais e mes
-
-Tipo: Markdown
-
-Interpreta dois pontos: a tabela anterior compara os paises, enquanto o grafico mensal mostra a variacao ao longo dos meses. Setembro se destaca em taxa de compra sobre visitas e conversao pos-signup.
+- setembro apresenta a melhor taxa de compra sobre visitas;
+- setembro tambem tem a melhor conversao pos-signup.
 
 Fala sugerida:
 
-> Nesta parte eu separo duas leituras: primeiro olho a tabela por pais para ver se algum mercado foge muito do padrao; depois olho o grafico mensal para entender a evolucao temporal. No grafico mensal, setembro aparece como o melhor mes em conversao para compra e conversao pos-signup.
+> No grafico mensal, setembro aparece como o melhor mes em conversao para compra e conversao pos-signup. Aqui o foco e a variacao ao longo do tempo, nao a comparacao por pais.
 
-## Celula 32 - Secao de NPS
+## Celula 33 - NPS geral e por segmento
 
-Tipo: Markdown
+A tabela mostra:
 
-Abre a analise de satisfacao/NPS.
-
-## Celula 33 - Consulta de NPS geral e por segmento
-
-Tipo: Codigo
-
-Consulta `vw_nps_summary` e adiciona uma linha geral. Calcula respostas, NPS medio, promotores, passivos, detratores e NPS para compradores, nao compradores e geral.
-
-Como ler a tabela:
-
-- `respostas`: quantidade de usuarios que responderam NPS.
-- `nps_medio`: media simples da nota NPS, em escala de 0 a 10.
-- `promotores`: numero real de respostas com nota maior ou igual a 9.
-- `passivos`: numero real de respostas com nota entre 7 e menor que 9.
-- `detratores`: numero real de respostas com nota menor que 7.
-- `nps`: indicador calculado como `% promotores - % detratores`, em uma escala de -100 a 100.
+- `respostas`: quantidade de usuarios que responderam NPS;
+- `nps_medio`: media da nota NPS de 0 a 10;
+- `promotores`: numero real de respostas com nota maior ou igual a 9;
+- `passivos`: numero real de respostas com nota entre 7 e menor que 9;
+- `detratores`: numero real de respostas com nota menor que 7;
+- `nps`: indicador calculado como percentual de promotores menos percentual de detratores.
 
 Ponto importante:
 
-`promotores`, `passivos` e `detratores` sao contagens absolutas de respostas, nao porcentagens. O campo `nps` e o indicador percentual consolidado.
+`promotores`, `passivos` e `detratores` sao contagens absolutas. O campo `nps` e o indicador percentual consolidado, em escala de -100 a 100.
 
 Fala sugerida:
 
-> Aqui separo NPS por compradores e nao compradores. Promotores, passivos e detratores sao numeros absolutos de respostas. O NPS calculado e o percentual de promotores menos o percentual de detratores. Essa separacao e essencial porque a media geral pode esconder experiencias muito diferentes.
+> Aqui eu separo compradores e nao compradores. Isso e importante porque o NPS geral pode esconder experiencias muito diferentes.
 
 ## Celula 34 - Grafico de NPS por segmento
 
-Tipo: Codigo
+Mostra a diferenca entre:
 
-Gera um grafico de barras para comparar NPS geral, compradores e nao compradores. Mostra que a media geral mascara diferencas relevantes.
-
-Fala sugerida:
-
-> Esse grafico mostra a diferenca de percepcao: compradores avaliam melhor, enquanto nao compradores tem NPS negativo. Isso aponta para friccao ou baixa percepcao de valor antes da compra.
-
-## Celula 35 - Consulta de NPS por canal
-
-Tipo: Codigo
-
-Consulta `vw_nps_by_channel`, ordenando os canais por NPS. Permite comparar satisfacao por origem do usuario.
+- compradores;
+- nao compradores;
+- geral.
 
 Fala sugerida:
 
-> Aqui comparo a satisfacao por canal. A ideia e entender se canais com melhor conversao tambem trazem usuarios mais satisfeitos.
+> O grafico mostra que compradores avaliam melhor, enquanto nao compradores tem NPS negativo. Isso sugere friccao ou baixa percepcao de valor antes da compra.
 
-## Celula 36 - Leitura de NPS
+## Celula 35 - NPS por canal
 
-Tipo: Markdown
-
-Interpreta que compradores possuem NPS positivo e nao compradores possuem NPS negativo, sugerindo friccao ou desalinhamento de valor antes da compra.
-
-## Celula 37 - Conclusoes antes do dashboard
-
-Tipo: Markdown
-
-Consolida os principais achados do notebook: gargalos do funil, qualidade de referral, necessidade de otimizar paid, oportunidade em mobile, importancia de organic, cuidado com NPS geral e recomendacoes de negocio.
+Compara satisfacao por origem do usuario.
 
 Fala sugerida:
 
-> No final, eu conecto os achados as recomendacoes: escalar referral, otimizar paid, melhorar mobile, fortalecer organic, trabalhar email/lifecycle e investigar nao compradores com NPS baixo.
+> Aqui eu vejo se os canais que convertem melhor tambem trazem usuarios mais satisfeitos. Referral aparece bem tambem em NPS, reforcando que e um canal de maior qualidade.
+
+## Celula 37 - Conclusoes
+
+Principais conclusoes:
+
+- o funil tem gargalo antes do signup;
+- tambem existe perda relevante depois do signup;
+- referral e o canal de melhor qualidade;
+- paid e social precisam de otimizacao;
+- mobile e oportunidade por volume;
+- NPS deve ser lido separando compradores e nao compradores.
+
+Fala sugerida:
+
+> No final, conecto os achados as recomendacoes: escalar referral, otimizar paid, melhorar mobile, fortalecer organic, trabalhar email/lifecycle e investigar nao compradores com NPS baixo.
