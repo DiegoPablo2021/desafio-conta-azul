@@ -490,10 +490,6 @@ desafio-conta-azul/
     documentacao_tecnica_funcional.md
     guia_celulas_notebook.md
     resumo_executivo.md
-  output/
-    doc/
-      resumo_executivo_conta_azul.docx
-      roteiro_apresentacao_conta_azul.docx
 ```
 
 Responsabilidades principais:
@@ -508,7 +504,8 @@ Responsabilidades principais:
 - `sql/`: consultas SQL reproduziveis para avaliacao tecnica.
 - `docs/`: documentacao tecnica e resumo executivo em Markdown.
 - `docs/guia_celulas_notebook.md`: explicacao celula a celula do notebook de EDA.
-- `output/doc/`: arquivos Word finais, incluindo resumo executivo e roteiro de apresentacao.
+- `scripts/`: geradores opcionais dos documentos Word em `output/doc/`.
+- `output/doc/`: pasta de saida local criada pelos scripts; os `.docx` gerados nao precisam ser versionados.
 
 ### 7.2 Camadas
 
@@ -1339,11 +1336,6 @@ desafio-conta-azul/
     export_summary_docx.py
     export_presentation_script_docx.py
     export_notebook_guide_docx.py
-  output/
-    doc/
-      resumo_executivo_conta_azul.docx
-      roteiro_apresentacao_conta_azul.docx
-      guia_celulas_notebook.docx
 ```
 
 Observacao: as validacoes de qualidade estao implementadas em `src/data_pipeline.py` e expostas no dashboard.
@@ -1386,11 +1378,13 @@ URL local do dashboard:
 http://localhost:8501
 ```
 
-### 16.2 Como abrir o resumo executivo em Word
+### 16.2 Como abrir os documentos Word gerados localmente
 
-O arquivo `.docx` nao deve ser lido como texto no VS Code. O formato `.docx` e um pacote compactado do Microsoft Word; ao abrir diretamente no editor de texto, o conteudo aparece como caracteres ilegíveis.
+Os arquivos `.docx` sao gerados localmente em `output/doc/` pelos scripts da pasta `scripts/`. Eles nao ficam versionados no repositorio, pois sao saidas de processamento que podem ser recriadas a qualquer momento.
 
-Arquivo gerado:
+Um arquivo `.docx` nao deve ser lido como texto no VS Code. O formato `.docx` e um pacote compactado do Microsoft Word; ao abrir diretamente no editor de texto, o conteudo aparece como caracteres ilegíveis.
+
+Exemplo de arquivo gerado:
 
 ```text
 output/doc/resumo_executivo_conta_azul.docx
@@ -1520,9 +1514,7 @@ Os dados indicam que o crescimento mais promissor passa por:
 | `scripts/export_summary_docx.py` | Criado | Gerador do resumo executivo em Word |
 | `scripts/export_presentation_script_docx.py` | Criado | Gerador do roteiro de apresentacao em Word, com textos curtos, bullets e blocos de `Fala sugerida` para explicar o dashboard Streamlit |
 | `scripts/export_notebook_guide_docx.py` | Criado | Gerador da versao Word do guia celula a celula do notebook |
-| `output/doc/resumo_executivo_conta_azul.docx` | Criado | Documento Word final |
-| `output/doc/roteiro_apresentacao_conta_azul.docx` | Criado | Documento Word de apoio pessoal para apresentacao, com falas curtas por etapa do projeto e por aba do Streamlit |
-| `output/doc/guia_celulas_notebook.docx` | Criado | Documento Word de apoio pessoal para explicar cada celula do notebook |
+| `output/doc/*.docx` | Gerado localmente | Arquivos Word criados pelos scripts; tratados como saida local e nao versionados no repositorio |
 | `notebooks/01_eda_funil_saas.ipynb` | Criado | Notebook de EDA com leitura do CSV, profiling, validacoes, SQL, graficos Plotly e conclusoes |
 | `README.md` | Criado | Instrucoes de execucao |
 | `requirements.txt` | Criado | Dependencias do projeto |
@@ -1559,7 +1551,6 @@ sql/
 notebooks/01_eda_funil_saas.ipynb
 docs/resumo_executivo.md
 docs/documentacao_tecnica_funcional.md
-output/doc/resumo_executivo_conta_azul.docx
 ```
 
 Essa composicao cobre:
@@ -1567,7 +1558,7 @@ Essa composicao cobre:
 - Consultas SQL e views reproduziveis.
 - Notebook de investigacao analitica.
 - Dashboard Streamlit.
-- Resumo executivo formal.
+- Resumo executivo em Markdown e script para gerar Word localmente.
 - Documentacao tecnica e instrucoes de execucao.
 
 ### 22.2 Arquivos que nao precisam ser enviados
@@ -1578,8 +1569,7 @@ Essa composicao cobre:
 | `.vscode/` | Configuracao local do VS Code |
 | `__pycache__/` | Cache gerado pelo Python |
 | `.ipynb_checkpoints/` | Checkpoints automaticos do Jupyter |
-| `output/doc/roteiro_apresentacao_conta_azul.docx` | Material pessoal de apoio para apresentacao |
-| `output/doc/guia_celulas_notebook.docx` | Material pessoal de apoio para explicar o notebook |
+| `output/doc/*.docx` | Saidas locais geradas por script; podem ser recriadas a qualquer momento |
 | `docs/guia_celulas_notebook.md` | Material de apoio para explicar o notebook; enviar apenas se quiser documentacao extra |
 | Prints, temporarios e copias antigas | Nao agregam valor e podem confundir a avaliacao |
 
@@ -1598,7 +1588,7 @@ Foram executadas as seguintes validacoes tecnicas:
 - Validacao das regras criticas de funil e NPS.
 - Recalculo das metricas principais via DuckDB.
 - Criacao das views analiticas `vw_funnel_*`, `vw_nps_*`, `vw_plan_mix` e `vw_channel_device`.
-- Geracao do arquivo Word `output/doc/resumo_executivo_conta_azul.docx`.
+- Geracao local dos arquivos Word em `output/doc/`.
 - Teste HTTP do Streamlit em `http://localhost:8501`, com retorno 200.
 
 ### 21.4 Resposta explicita ao resultado esperado do desafio
@@ -1639,7 +1629,7 @@ Essa combinacao entrega uma resposta aderente ao case, tecnicamente defensavel e
 - Removidas do README as orientacoes pessoais de envio/nao envio para manter o arquivo com aparencia profissional.
 - Guia celula a celula do notebook restaurado em `docs/guia_celulas_notebook.md`, mantendo o script `scripts/export_notebook_guide_docx.py` funcional.
 - Arquivo `.gitignore` criado para evitar caches Python, checkpoints Jupyter e arquivos temporarios.
-- Documentos Word regenerados em `output/doc/`.
+- Documentos Word testados localmente e removidos do versionamento; `output/doc/*.docx` fica ignorado no Git.
 - Repositorio GitHub criado em `https://github.com/DiegoPablo2021/desafio-conta-azul`.
 - Dependencias travadas em `requirements.txt` para reduzir risco de quebra no deploy.
 

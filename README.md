@@ -90,9 +90,6 @@ desafio-conta-azul/
     resumo_executivo.md
   notebooks/
     01_eda_funil_saas.ipynb
-  output/
-    doc/
-      resumo_executivo_conta_azul.docx
   scripts/
     export_summary_docx.py
     export_presentation_script_docx.py
@@ -126,19 +123,19 @@ Dashboard Streamlit:
 py -3.13 -m streamlit run app.py
 ```
 
-Resumo executivo em Word:
+Gerar resumo executivo em Word:
 
 ```powershell
 py -3.13 scripts\export_summary_docx.py
 ```
 
-Roteiro de apresentacao em Word:
+Gerar roteiro de apresentacao em Word:
 
 ```powershell
 py -3.13 scripts\export_presentation_script_docx.py
 ```
 
-Guia do notebook em Word:
+Gerar guia do notebook em Word:
 
 ```powershell
 py -3.13 scripts\export_notebook_guide_docx.py
@@ -258,11 +255,7 @@ Documentos em Markdown:
 - `docs/resumo_executivo.md`: versao Markdown do resumo executivo.
 - `docs/guia_celulas_notebook.md`: guia celula a celula do notebook.
 
-Documentos Word gerados em `output/doc/`:
-
-- `resumo_executivo_conta_azul.docx`
-
-Os scripts tambem podem gerar materiais de apoio para apresentacao em `output/doc/`, como o roteiro de demonstracao e o guia do notebook em Word.
+Os documentos Word sao gerados localmente pelos scripts em `output/doc/`. Essa pasta e tratada como saida de processamento e nao precisa ficar versionada no repositorio.
 
 Arquivos `.docx` devem ser abertos no Microsoft Word ou aplicativo equivalente. Ao abrir um `.docx` como texto no VS Code, o conteudo aparece como binario ilegivel.
 
