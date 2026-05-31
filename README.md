@@ -4,6 +4,12 @@ Projeto analitico local para investigar o funil de conversao de um produto SaaS 
 
 O objetivo e entender o comportamento dos usuarios, identificar gargalos no funil, aplicar raciocinio analitico com validacoes e transformar os achados em recomendacoes de negocio.
 
+Repositorio GitHub:
+
+```text
+https://github.com/DiegoPablo2021/desafio-conta-azul
+```
+
 ## Stack
 
 - Python
@@ -143,6 +149,21 @@ Validacao sintatica dos arquivos Python:
 ```powershell
 py -3.13 -m compileall app.py src scripts
 ```
+
+## Deploy
+
+O app esta preparado para deploy no Streamlit Community Cloud a partir do GitHub.
+
+Configuracao:
+
+```text
+Repository: DiegoPablo2021/desafio-conta-azul
+Branch: main
+Main file path: app.py
+Python version: 3.12 ou superior
+```
+
+O Streamlit Cloud executa o app a partir da raiz do repositorio e instala as dependencias declaradas em `requirements.txt`.
 
 ## Notebook
 

@@ -1640,6 +1640,8 @@ Essa combinacao entrega uma resposta aderente ao case, tecnicamente defensavel e
 - Guia celula a celula do notebook restaurado em `docs/guia_celulas_notebook.md`, mantendo o script `scripts/export_notebook_guide_docx.py` funcional.
 - Arquivo `.gitignore` criado para evitar caches Python, checkpoints Jupyter e arquivos temporarios.
 - Documentos Word regenerados em `output/doc/`.
+- Repositorio GitHub criado em `https://github.com/DiegoPablo2021/desafio-conta-azul`.
+- Dependencias travadas em `requirements.txt` para reduzir risco de quebra no deploy.
 
 ### 23.2 Validacoes finais executadas
 
@@ -1659,3 +1661,16 @@ Essa combinacao entrega uma resposta aderente ao case, tecnicamente defensavel e
 ### 23.3 Status final
 
 O projeto esta pronto para demonstracao local. A solucao cobre os entregaveis do desafio com notebook, SQL, dashboard, resumo executivo, documentacao tecnica e validacoes reproduziveis.
+
+### 23.4 Configuracao para deploy Streamlit
+
+Configuracao recomendada no Streamlit Community Cloud:
+
+| Campo | Valor |
+|---|---|
+| Repository | `DiegoPablo2021/desafio-conta-azul` |
+| Branch | `main` |
+| Main file path | `app.py` |
+| Python version | `3.12` ou superior |
+
+O app nao depende de secrets. A base CSV necessaria para o dashboard esta versionada no repositorio e as dependencias estao no arquivo `requirements.txt`.
