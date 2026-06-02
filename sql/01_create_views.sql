@@ -122,6 +122,34 @@ select
         / nullif(sum(case when nps_score is not null then 1 else 0 end), 0) as taxa_respostas_elegiveis
 from stg_funnel_users;
 
+create or replace view vw_nps_non_eligible_detail as
+select
+    user_id,
+    dt_visit,
+    visit_month,
+    channel,
+    device,
+    country,
+    signup,
+    funnel_stage,
+    nps_score,
+    nps_class
+from stg_funnel_users
+where purchase = 0
+  and nps_score is not null;
+
+create or replace view vw_nps_non_eligible_by_channel_device as
+select
+    channel,
+    device,
+    count(*) as respostas_nao_elegiveis,
+    avg(nps_score) as nps_medio_observado,
+    sum(case when nps_class = 'Promoter' then 1 else 0 end) as promotores,
+    sum(case when nps_class = 'Passive' then 1 else 0 end) as passivos,
+    sum(case when nps_class = 'Detractor' then 1 else 0 end) as detratores
+from vw_nps_non_eligible_detail
+group by channel, device;
+
 create or replace view vw_nps_by_channel as
 with scored as (
     select

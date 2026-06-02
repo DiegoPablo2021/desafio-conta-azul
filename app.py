@@ -10,6 +10,8 @@ from src.metrics import (
     get_funnel_steps,
     get_nps_eligibility,
     get_nps_by_channel,
+    get_nps_non_eligible_breakdown,
+    get_nps_non_eligible_combinations,
     get_nps_summary,
     get_overall_funnel,
     get_segment_funnel,
@@ -217,6 +219,12 @@ with tab_nps:
     nps_summary = get_nps_summary(con)
     nps_eligibility = get_nps_eligibility(con).iloc[0]
     nps_channel = get_nps_by_channel(con)
+    non_eligible_channel = get_nps_non_eligible_breakdown(con, "channel")
+    non_eligible_device = get_nps_non_eligible_breakdown(con, "device")
+    non_eligible_country = get_nps_non_eligible_breakdown(con, "country")
+    non_eligible_signup = get_nps_non_eligible_breakdown(con, "signup_status")
+    non_eligible_class = get_nps_non_eligible_breakdown(con, "nps_class")
+    non_eligible_combinations = get_nps_non_eligible_combinations(con)
 
     st.subheader("NPS - compradores elegiveis")
     st.markdown(
@@ -247,6 +255,52 @@ with tab_nps:
 
     st.subheader("Elegibilidade das respostas NPS")
     st.dataframe(pd.DataFrame([nps_eligibility]), use_container_width=True, hide_index=True)
+
+    st.subheader("Investigacao das respostas NPS nao elegiveis")
+    st.markdown(
+        """
+        Esta secao nao recalcula NPS. Ela ajuda a investigar os registros que possuem
+        nota NPS, mas nao possuem compra associada no dataset filtrado.
+        """
+    )
+
+    left, right = st.columns(2)
+    with left:
+        fig = px.bar(
+            non_eligible_channel.sort_values("respostas_nao_elegiveis"),
+            x="respostas_nao_elegiveis",
+            y="segmento",
+            orientation="h",
+            text="respostas_nao_elegiveis",
+            title="Respostas nao elegiveis por canal",
+            labels={"segmento": "Canal", "respostas_nao_elegiveis": "Respostas"},
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
+    with right:
+        fig = px.bar(
+            non_eligible_device,
+            x="segmento",
+            y="respostas_nao_elegiveis",
+            text="respostas_nao_elegiveis",
+            title="Respostas nao elegiveis por dispositivo",
+            labels={"segmento": "Dispositivo", "respostas_nao_elegiveis": "Respostas"},
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
+    c1, c2, c3 = st.columns(3)
+    with c1:
+        st.markdown("#### Por pais")
+        st.dataframe(non_eligible_country, use_container_width=True, hide_index=True)
+    with c2:
+        st.markdown("#### Por status de signup")
+        st.dataframe(non_eligible_signup, use_container_width=True, hide_index=True)
+    with c3:
+        st.markdown("#### Por classe da nota")
+        st.dataframe(non_eligible_class, use_container_width=True, hide_index=True)
+
+    st.markdown("#### Principais combinacoes")
+    st.dataframe(non_eligible_combinations, use_container_width=True, hide_index=True)
 
     st.subheader("NPS por canal")
     fig = px.bar(
@@ -332,6 +386,17 @@ with tab_response:
             - Investigar usuarios sem compra por pesquisa qualitativa, eventos de jornada ou motivos de abandono.
             """
         )
+
+    st.markdown("#### Investigacao adicional: respostas NPS nao elegiveis")
+    st.markdown(
+        """
+        - Foram identificadas respostas NPS em usuarios sem compra associada.
+        - Esses registros nao entram no NPS final, pois o NPS foi tratado como pesquisa pos-compra.
+        - A investigacao foi adicionada ao dashboard para segmentar esses registros por canal, dispositivo, pais, signup e classe da nota.
+        - Na base completa, a maior concentracao esta em `organic` e `paid`, em `mobile`, e principalmente em usuarios com signup sem compra.
+        - Possiveis resolucoes: validar regra de disparo da pesquisa, auditar tracking de purchase, checar compras fora da janela e criar pesquisa especifica para abandono.
+        """
+    )
 
     st.info(
         "Em resumo: a entrega mostra o que acontece no funil, onde o produto perde usuarios, "

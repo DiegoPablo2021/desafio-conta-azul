@@ -203,7 +203,7 @@ O dashboard possui cinco abas:
 
 - `Visao geral`: KPIs do funil, grafico de funil e evolucao mensal.
 - `Segmentos`: performance por canal, dispositivo, pais, plano e matriz canal x dispositivo.
-- `NPS`: NPS de compradores elegiveis, NPS por canal e alerta de respostas nao elegiveis.
+- `NPS`: NPS de compradores elegiveis, NPS por canal e investigacao de respostas nao elegiveis.
 - `Qualidade dos dados`: profiling e validacoes da base.
 - `Resposta ao case`: conexao direta entre achados, raciocinio analitico e recomendacoes.
 
@@ -233,6 +233,8 @@ Views criadas:
 - `vw_channel_device`
 - `vw_nps_summary`
 - `vw_nps_eligibility`
+- `vw_nps_non_eligible_detail`
+- `vw_nps_non_eligible_by_channel_device`
 - `vw_nps_by_channel`
 
 Consultas complementares:
@@ -256,6 +258,22 @@ As validacoes ficam em `src/data_pipeline.py` e cobrem:
 - categorias inesperadas em canal, dispositivo, pais e plano.
 
 Na base completa, as regras criticas do funil nao apresentaram inconsistencias.
+
+As respostas NPS sem compra associada nao entram no NPS final. Elas sao analisadas em uma secao propria do dashboard por canal, dispositivo, pais, status de signup, classe da nota e principais combinacoes, ajudando a investigar possiveis diferencas de tracking, janela de atribuicao ou regra de disparo da pesquisa.
+
+Na base completa, a investigacao dessas 465 respostas nao elegiveis mostrou:
+
+- por canal: `organic` concentra 204 respostas e `paid` concentra 130;
+- por dispositivo: `mobile` concentra 280 respostas e `desktop` concentra 185;
+- por status de signup: 404 usuarios fizeram signup, mas nao possuem compra associada;
+- principal leitura: os registros parecem mais proximos de uma pesquisa de ativacao/trial ou de uma diferenca de tracking/janela de observacao do que de um NPS pos-compra valido.
+
+Possiveis encaminhamentos para a empresa:
+
+- validar a regra de disparo da pesquisa;
+- auditar tracking de `purchase`, principalmente em mobile;
+- verificar se existem compras fora da janela analisada;
+- criar pesquisa especifica de abandono para usuarios que fizeram signup e nao compraram.
 
 ## Documentacao
 

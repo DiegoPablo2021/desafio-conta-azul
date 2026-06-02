@@ -87,6 +87,12 @@ def build_document() -> DocxDocument:
         "de 33,33. As 465 respostas associadas a usuarios sem compra foram tratadas como "
         "ponto de investigacao, nao como NPS valido de nao compradores.",
     )
+    add_paragraph(
+        document,
+        "A investigacao desses 465 registros mostrou concentracao em organic (204), paid (130), "
+        "mobile (280) e usuarios com signup sem compra (404). Isso sugere validar regra de disparo "
+        "da pesquisa, tracking de purchase, janela de observacao e possivel survey de ativacao/trial.",
+    )
 
     add_heading(document, "2. Gargalos e hipoteses", level=1)
     add_paragraph(
@@ -116,6 +122,7 @@ def build_document() -> DocxDocument:
         "Fortalecer organic com SEO, conteudo orientado ao ICP e paginas de conversao mais contextualizadas.",
         "Explorar email/lifecycle para nutrir usuarios pos-visita e recuperar signups sem compra.",
         "Investigar usuarios que nao compraram por pesquisa qualitativa, eventos de abandono e analise de jornada.",
+        "Auditar respostas NPS nao elegiveis, principalmente em mobile, organic e paid.",
     ]
     for item in recommendations:
         document.add_paragraph(item, style="List Bullet")

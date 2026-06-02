@@ -179,3 +179,60 @@ def get_nps_by_channel(con: duckdb.DuckDBPyConnection) -> pd.DataFrame:
         order by nps desc
         """,
     )
+
+
+def get_nps_non_eligible_breakdown(con: duckdb.DuckDBPyConnection, dimension: str) -> pd.DataFrame:
+    dimensions = {
+        "channel": "channel",
+        "device": "device",
+        "country": "country",
+        "visit_month": "visit_month",
+        "funnel_stage": "funnel_stage",
+        "nps_class": "nps_class",
+        "signup_status": "case when signup = 1 then 'Com signup' else 'Sem signup' end",
+    }
+    if dimension not in dimensions:
+        raise ValueError(f"Dimensao nao permitida: {dimension}")
+
+    expression = dimensions[dimension]
+    return query_df(
+        con,
+        f"""
+        select
+            {expression} as segmento,
+            count(*) as respostas_nao_elegiveis,
+            avg(nps_score) as nps_medio_observado,
+            sum(case when nps_class = 'Promoter' then 1 else 0 end) as promotores,
+            sum(case when nps_class = 'Passive' then 1 else 0 end) as passivos,
+            sum(case when nps_class = 'Detractor' then 1 else 0 end) as detratores
+        from stg_funnel_users
+        where purchase = 0
+          and nps_score is not null
+        group by 1
+        order by respostas_nao_elegiveis desc, nps_medio_observado
+        """,
+    )
+
+
+def get_nps_non_eligible_combinations(con: duckdb.DuckDBPyConnection) -> pd.DataFrame:
+    return query_df(
+        con,
+        """
+        select
+            channel,
+            device,
+            country,
+            case when signup = 1 then 'Com signup' else 'Sem signup' end as signup_status,
+            count(*) as respostas_nao_elegiveis,
+            avg(nps_score) as nps_medio_observado,
+            sum(case when nps_class = 'Promoter' then 1 else 0 end) as promotores,
+            sum(case when nps_class = 'Passive' then 1 else 0 end) as passivos,
+            sum(case when nps_class = 'Detractor' then 1 else 0 end) as detratores
+        from stg_funnel_users
+        where purchase = 0
+          and nps_score is not null
+        group by 1, 2, 3, 4
+        order by respostas_nao_elegiveis desc, nps_medio_observado
+        limit 20
+        """,
+    )

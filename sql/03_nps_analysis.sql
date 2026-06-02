@@ -36,6 +36,34 @@ select
         / nullif(sum(case when nps_score is not null then 1 else 0 end), 0) as taxa_respostas_elegiveis
 from stg_funnel_users;
 
+-- Investigacao das respostas NPS nao elegiveis por canal
+select
+    channel,
+    count(*) as respostas_nao_elegiveis,
+    avg(nps_score) as nps_medio_observado,
+    sum(case when nps_class = 'Promoter' then 1 else 0 end) as promotores,
+    sum(case when nps_class = 'Passive' then 1 else 0 end) as passivos,
+    sum(case when nps_class = 'Detractor' then 1 else 0 end) as detratores
+from stg_funnel_users
+where purchase = 0
+  and nps_score is not null
+group by channel
+order by respostas_nao_elegiveis desc;
+
+-- Investigacao das respostas NPS nao elegiveis por dispositivo
+select
+    device,
+    count(*) as respostas_nao_elegiveis,
+    avg(nps_score) as nps_medio_observado,
+    sum(case when nps_class = 'Promoter' then 1 else 0 end) as promotores,
+    sum(case when nps_class = 'Passive' then 1 else 0 end) as passivos,
+    sum(case when nps_class = 'Detractor' then 1 else 0 end) as detratores
+from stg_funnel_users
+where purchase = 0
+  and nps_score is not null
+group by device
+order by respostas_nao_elegiveis desc;
+
 -- NPS por canal, considerando apenas compradores elegiveis
 with scored as (
     select

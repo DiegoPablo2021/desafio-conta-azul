@@ -259,6 +259,21 @@ Fala sugerida:
 
 > O grafico mostra o NPS dos usuarios que compraram. Respostas associadas a usuarios sem compra nao devem ser interpretadas como NPS de nao compradores.
 
+## Investigacao adicional - Respostas NPS nao elegiveis
+
+Esses registros possuem nota NPS, mas nao possuem compra associada. Eles nao entram no NPS final, mas ajudam a investigar tracking, regra de disparo da pesquisa ou janela de observacao.
+
+Principais padroes encontrados:
+
+- `organic`: 204 respostas nao elegiveis.
+- `paid`: 130 respostas nao elegiveis.
+- `mobile`: 280 respostas nao elegiveis.
+- usuarios com signup sem compra: 404 respostas nao elegiveis.
+
+Fala sugerida:
+
+> Aqui eu nao uso esses registros como NPS de nao compradores. Eu os trato como investigacao: onde eles aparecem, qual origem tem mais ocorrencia e se pode haver pesquisa de ativacao, compra fora da janela ou problema de tracking.
+
 ## Celula 37 - Conclusoes
 
 Principais conclusoes:
@@ -269,6 +284,7 @@ Principais conclusoes:
 - paid e social precisam de otimizacao;
 - mobile e oportunidade por volume;
 - NPS deve ser lido apenas para compradores elegiveis; respostas sem compra viram ponto de investigacao.
+- respostas NPS nao elegiveis se concentram em organic, paid, mobile e usuarios com signup sem compra.
 
 Fala sugerida:
 

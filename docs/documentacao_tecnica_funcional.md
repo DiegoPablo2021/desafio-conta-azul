@@ -157,6 +157,24 @@ Existem 465 respostas de NPS associadas a usuarios sem compra no dataset. Elas n
 
 Essa decisao evita uma conclusao incorreta, como afirmar que nao compradores possuem NPS negativo.
 
+Investigacao adicional sobre os 465 registros nao elegiveis:
+
+| Recorte | Principal concentracao | Volume |
+| ------- | ---------------------- | -----: |
+| Canal | `organic` | 204 |
+| Canal | `paid` | 130 |
+| Dispositivo | `mobile` | 280 |
+| Dispositivo | `desktop` | 185 |
+| Status de signup | Com signup e sem compra | 404 |
+| Status de signup | Sem signup e sem compra | 61 |
+
+Leitura tecnica:
+
+- A concentracao em usuarios com signup sem compra sugere que a pesquisa pode estar sendo disparada em uma etapa de ativacao/trial, e nao necessariamente apos purchase.
+- A concentracao em mobile justifica auditoria de tracking e integracao da jornada mobile.
+- A presenca relevante em organic e paid ajuda a priorizar a investigacao por origem de trafego.
+- A empresa deveria validar a regra de disparo da pesquisa, a janela de observacao de purchase e possiveis atrasos/inconsistencias de instrumentacao.
+
 ### 4.3 Regras recomendadas para producao
 
 Em uma solucao produtiva, as validacoes minimas devem bloquear ou alertar quando:
@@ -599,6 +617,8 @@ Views criadas em memoria pelo DuckDB:
 | `vw_channel_device` | Conversao cruzada por canal e dispositivo |
 | `vw_nps_summary` | NPS de compradores elegiveis |
 | `vw_nps_eligibility` | Controle de respostas NPS elegiveis e nao elegiveis |
+| `vw_nps_non_eligible_detail` | Detalhe das respostas NPS sem compra associada |
+| `vw_nps_non_eligible_by_channel_device` | Investigacao de respostas NPS nao elegiveis por canal e dispositivo |
 | `vw_nps_by_channel` | NPS por canal |
 
 #### Grao da fato principal
@@ -1134,6 +1154,7 @@ Componentes:
 
 - NPS de compradores elegiveis.
 - Controle de respostas NPS elegiveis e nao elegiveis.
+- Investigacao das respostas nao elegiveis por canal, dispositivo, pais, status de signup, classe da nota e combinacoes principais.
 - Distribuicao de notas.
 - NPS por canal.
 - NPS por plano.
@@ -1144,6 +1165,7 @@ Mensagem esperada:
 - Compradores possuem NPS positivo, indicando boa experiencia depois da conversao.
 - Respostas NPS sem compra nao devem ser interpretadas como NPS de nao compradores.
 - Entender motivos de nao conversao deve ser feito por pesquisa qualitativa, eventos de abandono ou survey especifico de leads.
+- A segmentacao dos registros nao elegiveis ajuda a priorizar a investigacao: se houver concentracao por canal, dispositivo ou pais, o proximo passo e auditar tracking e regra de disparo nesses recortes.
 
 ## 13. Recomendacoes de negocio
 
@@ -1259,6 +1281,8 @@ Recomendacoes:
 - Cruzar abandono com canal, dispositivo e etapa do funil.
 - Criar pesquisa qualitativa com usuarios que nao compraram.
 - Investigar se as respostas NPS sem compra indicam outra pesquisa, compra fora da janela ou problema de tracking.
+- Auditar prioritariamente mobile, organic e paid, pois concentram os maiores volumes de respostas nao elegiveis.
+- Validar se a pesquisa e acionada no signup/trial, em vez de ser exclusivamente pos-compra.
 - Revisar onboarding para reduzir frustracao antes da compra.
 
 ## 14. Hipoteses de teste
