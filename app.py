@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 import plotly.express as px
+import pandas as pd
 import streamlit as st
 
 from src.data_pipeline import create_connection, load_validated_connection, profile_data, validate_data
 from src.metrics import (
     get_channel_device_matrix,
     get_funnel_steps,
+    get_nps_eligibility,
     get_nps_by_channel,
     get_nps_summary,
     get_overall_funnel,
@@ -117,7 +119,7 @@ with tab_overview:
     c4.metric("Signup -> compra", fmt_pct(overall["signup_to_purchase_rate"]))
 
     c5, c6, c7, c8 = st.columns(4)
-    c5.metric("Respostas NPS", fmt_number(overall["nps_responses"]), fmt_pct(overall["nps_response_rate"]))
+    c5.metric("Respostas NPS compradores", fmt_number(overall["nps_responses"]), fmt_pct(overall["nps_response_rate"]))
     c6.metric("NPS medio", f"{overall['avg_nps_score']:.2f}".replace(".", ","))
     c7.metric("Drop-off visita -> signup", fmt_pct(1 - overall["visit_to_signup_rate"]))
     c8.metric("Drop-off signup -> compra", fmt_pct(1 - overall["signup_to_purchase_rate"]))
@@ -213,9 +215,24 @@ with tab_segments:
 
 with tab_nps:
     nps_summary = get_nps_summary(con)
+    nps_eligibility = get_nps_eligibility(con).iloc[0]
     nps_channel = get_nps_by_channel(con)
 
-    st.subheader("NPS - compradores vs nao compradores")
+    st.subheader("NPS - compradores elegiveis")
+    st.markdown(
+        """
+        Nesta leitura, NPS e considerado uma pesquisa pos-compra. Por isso, o indicador
+        e calculado apenas para usuarios que compraram.
+        """
+    )
+    if nps_eligibility["respostas_nps_nao_elegiveis"] > 0:
+        st.warning(
+            "Foram encontradas "
+            f"{fmt_number(nps_eligibility['respostas_nps_nao_elegiveis'])} respostas de NPS "
+            "em usuarios sem compra no dataset filtrado. Elas nao entram no calculo do NPS "
+            "e devem ser investigadas como regra de negocio, janela de atribuição ou tracking."
+        )
+
     fig = px.bar(
         nps_summary,
         x="segmento",
@@ -227,6 +244,9 @@ with tab_nps:
     fig.update_traces(texttemplate="%{text:.1f}")
     st.plotly_chart(fig, use_container_width=True)
     st.dataframe(nps_summary, use_container_width=True, hide_index=True)
+
+    st.subheader("Elegibilidade das respostas NPS")
+    st.dataframe(pd.DataFrame([nps_eligibility]), use_container_width=True, hide_index=True)
 
     st.subheader("NPS por canal")
     fig = px.bar(
@@ -255,6 +275,8 @@ with tab_quality:
         """
         As regras criticas do funil nao apresentaram inconsistencias na base completa:
         nao ha compra sem signup, compra sem plano, plano sem compra, nem NPS preenchido sem resposta.
+        Como NPS foi tratado como pesquisa pos-compra, respostas NPS associadas a usuarios sem compra
+        aparecem como ponto de investigacao e nao entram no indicador final.
         """
     )
 
@@ -274,7 +296,7 @@ with tab_response:
             """
             - O funil foi medido de visita para signup e de signup para compra.
             - A analise foi segmentada por canal, dispositivo, pais, mes e plano.
-            - O NPS foi separado entre compradores e nao compradores para evitar media enganosa.
+            - O NPS foi calculado apenas para compradores, respeitando a regra de pesquisa pos-compra.
             """
         )
 
@@ -295,7 +317,7 @@ with tab_response:
             - As metricas foram calculadas por SQL no DuckDB, reduzindo risco de calculos manuais.
             - A base passou por validacoes de unicidade, nulos, consistencia de funil e dominios.
             - As taxas foram comparadas por segmento para diferenciar volume, eficiencia e qualidade.
-            - A leitura de NPS evita conclusao superficial ao separar compradores de nao compradores.
+            - A leitura de NPS evita conclusao superficial ao separar respostas elegiveis de registros que exigem investigacao.
             """
         )
 
@@ -307,7 +329,7 @@ with tab_response:
             - Melhorar UX e checkout mobile.
             - Fortalecer organic por combinar escala e eficiencia.
             - Usar email/lifecycle para recuperar signups sem compra.
-            - Investigar nao compradores com NPS baixo para entender friccoes e objeções.
+            - Investigar usuarios sem compra por pesquisa qualitativa, eventos de jornada ou motivos de abandono.
             """
         )
 

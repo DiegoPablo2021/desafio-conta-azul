@@ -1,7 +1,7 @@
--- NPS geral, compradores e nao compradores
+-- NPS de compradores elegiveis
 with scored as (
     select
-        case when purchase = 1 then 'Compradores' else 'Nao compradores' end as segmento,
+        'Compradores' as segmento,
         nps_score,
         case
             when nps_score >= 9 then 'Promoter'
@@ -9,7 +9,8 @@ with scored as (
             else 'Detractor'
         end as nps_class
     from stg_funnel_users
-    where nps_score is not null
+    where purchase = 1
+      and nps_score is not null
 )
 select
     segmento,
@@ -26,7 +27,16 @@ from scored
 group by segmento
 order by nps desc;
 
--- NPS por canal
+-- Elegibilidade das respostas NPS
+select
+    sum(case when nps_score is not null then 1 else 0 end) as respostas_nps_na_base,
+    sum(case when purchase = 1 and nps_score is not null then 1 else 0 end) as respostas_nps_elegiveis,
+    sum(case when purchase = 0 and nps_score is not null then 1 else 0 end) as respostas_nps_nao_elegiveis,
+    sum(case when purchase = 1 and nps_score is not null then 1 else 0 end) * 1.0
+        / nullif(sum(case when nps_score is not null then 1 else 0 end), 0) as taxa_respostas_elegiveis
+from stg_funnel_users;
+
+-- NPS por canal, considerando apenas compradores elegiveis
 with scored as (
     select
         channel,
@@ -37,7 +47,8 @@ with scored as (
             else 'Detractor'
         end as nps_class
     from stg_funnel_users
-    where nps_score is not null
+    where purchase = 1
+      and nps_score is not null
 )
 select
     channel,

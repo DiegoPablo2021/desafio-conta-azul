@@ -22,14 +22,15 @@ A base possui 10.000 usuarios unicos, visitando o produto entre 2025-06-01 e 202
 | Visitas          | 10.000 |            100,00% |                   100,00% |
 | Signups          |  2.983 |             29,83% |                    29,83% |
 | Purchases        |    919 |              9,19% |        30,81% dos signups |
-| Respostas de NPS |  1.206 |             12,06% |                       N/A |
+| Respostas de NPS elegiveis |    741 | 80,63% das compras |                       N/A |
 
 Principais sinais preliminares:
 
 - `referral` e `email` sao os canais com melhor conversao para compra.
 - `paid` e `social` apresentam gargalos relevantes, principalmente na conversao final para plano pago.
 - `desktop` converte melhor que `mobile` em todas as etapas principais.
-- O NPS medio geral e 8,11, mas a separacao por comprador vs nao comprador muda muito a interpretacao: compradores possuem NPS estimado de 33,33, enquanto nao compradores possuem NPS estimado de -29,46.
+- O NPS deve ser interpretado como pesquisa pos-compra. Por isso, o indicador final considera apenas compradores elegiveis: 741 respostas, nota media 8,62 e NPS 33,33.
+- Existem 465 respostas NPS associadas a usuarios sem compra no dataset. Elas foram tratadas como ponto de investigacao de regra de negocio, janela de atribuição ou tracking, nao como NPS valido de nao compradores.
 - O plano `BASIC` concentra a maior parte das compras, com 526 de 919 compras, ou 57,24%.
 - O dataset e consistente nas principais regras de negocio: nao ha compra sem signup, compra sem plano, plano sem compra, nem tempos preenchidos em registros incompativeis.
 
@@ -139,18 +140,22 @@ Isso significa que:
 | `purchase = 1` sem `days_to_purchase`            |         0 |
 | `nps_score` preenchido sem `respondeu_nps = 1`   |         0 |
 | `respondeu_nps = 1` sem `nps_score`              |         0 |
-| Respostas de NPS de nao compradores                  |       465 |
+| Respostas de NPS nao elegiveis para NPS pos-compra   |       465 |
 
 ### 4.2 Interpretacao da qualidade
 
 O dataset esta adequado para a analise proposta. As regras essenciais do funil estao consistentes.
 
-O principal cuidado semantico e o NPS. Existem 465 respostas de NPS de usuarios que nao compraram. Logo, o NPS nao deve ser interpretado apenas como satisfacao de clientes pagantes. Ele deve ser analisado em pelo menos dois recortes:
+O principal cuidado semantico e o NPS. Nesta solucao, NPS e tratado como uma pesquisa pos-compra. Portanto, apenas respostas de usuarios compradores entram no indicador final.
 
-- NPS de compradores
-- NPS de nao compradores
+Existem 465 respostas de NPS associadas a usuarios sem compra no dataset. Elas nao sao usadas para calcular NPS de nao compradores, porque esse conceito nao e valido se a pesquisa NPS for exclusiva de clientes. Esses registros devem ser investigados como:
 
-Essa separacao evita conclusoes incorretas. Por exemplo, o NPS geral pode parecer saudavel, mas esconder forte insatisfacao entre usuarios que nao avancaram para compra.
+- possivel pesquisa diferente do NPS;
+- erro ou diferenca na instrumentacao de eventos;
+- compra ocorrida fora da janela analisada;
+- atraso de tracking ou inconsistencia de chaveamento.
+
+Essa decisao evita uma conclusao incorreta, como afirmar que nao compradores possuem NPS negativo.
 
 ### 4.3 Regras recomendadas para producao
 
@@ -275,18 +280,25 @@ Classificacao sugerida:
 
 Observacao: o dataset possui notas decimais. O NPS tradicional costuma usar nota inteira de 0 a 10. Como o dado vem decimal, a classificacao acima deve ser documentada como regra analitica adotada.
 
-| Segmento        | Respostas | NPS medio | NPS estimado | Promotores | Passivos | Detratores |
-| --------------- | --------: | --------: | -----------: | ---------: | -------: | ---------: |
-| Geral           |     1.206 |      8,11 |         9,12 |        337 |      642 |        227 |
-| Compradores     |       741 |      8,62 |        33,33 |        274 |      440 |         27 |
-| Nao compradores |       465 |      7,30 |       -29,46 |         63 |      202 |        200 |
+| Segmento elegivel | Respostas | NPS medio | NPS estimado | Promotores | Passivos | Detratores |
+| ----------------- | --------: | --------: | -----------: | ---------: | -------: | ---------: |
+| Compradores       |       741 |      8,62 |        33,33 |        274 |      440 |         27 |
+
+Controle de elegibilidade:
+
+| Regra | Valor |
+| ----- | ----: |
+| Respostas NPS na base | 1.206 |
+| Respostas NPS elegiveis, com compra | 741 |
+| Respostas NPS nao elegiveis, sem compra | 465 |
+| Percentual de respostas elegiveis | 61,44% |
 
 Interpretacao:
 
-- O NPS geral esconde duas realidades muito diferentes.
-- Usuarios que compram estao bem mais satisfeitos.
-- Usuarios que nao compram possuem insatisfacao relevante.
-- Esse padrao sugere que quem percebe valor suficiente para comprar tambem tende a avaliar melhor a experiencia, enquanto usuarios que nao convertem podem estar enfrentando desalinhamento de expectativa, friccao de ativacao ou baixa percepcao de valor.
+- O NPS final deve ser lido apenas para compradores, pois a pesquisa e pos-compra.
+- O valor `-29,46` anteriormente observado para nao compradores nao deve ser usado como NPS valido.
+- As 465 respostas associadas a usuarios sem compra sao um alerta de qualidade/negocio: podem indicar outro tipo de pesquisa, compra fora da janela analisada, atraso de tracking ou problema de instrumentacao.
+- Para entender nao compradores, a recomendacao correta e usar pesquisa qualitativa, eventos de abandono, motivos de nao conversao ou outro survey proprio para leads.
 
 ## 6. Stacks sugeridas
 
@@ -585,7 +597,8 @@ Views criadas em memoria pelo DuckDB:
 | `vw_funnel_by_month` | Evolucao mensal |
 | `vw_plan_mix` | Mix de planos comprados |
 | `vw_channel_device` | Conversao cruzada por canal e dispositivo |
-| `vw_nps_summary` | NPS geral, compradores e nao compradores |
+| `vw_nps_summary` | NPS de compradores elegiveis |
+| `vw_nps_eligibility` | Controle de respostas NPS elegiveis e nao elegiveis |
 | `vw_nps_by_channel` | NPS por canal |
 
 #### Grao da fato principal
@@ -1115,11 +1128,12 @@ Mensagem esperada:
 
 Objetivo:
 
-- Separar experiencia de compradores e nao compradores.
+- Medir a experiencia dos compradores elegiveis para NPS e evidenciar respostas nao elegiveis como ponto de investigacao.
 
 Componentes:
 
-- NPS geral, NPS de compradores e NPS de nao compradores.
+- NPS de compradores elegiveis.
+- Controle de respostas NPS elegiveis e nao elegiveis.
 - Distribuicao de notas.
 - NPS por canal.
 - NPS por plano.
@@ -1127,8 +1141,9 @@ Componentes:
 
 Mensagem esperada:
 
-- Nao compradores estao muito menos satisfeitos.
-- Entender motivos de nao conversao pode destravar crescimento.
+- Compradores possuem NPS positivo, indicando boa experiencia depois da conversao.
+- Respostas NPS sem compra nao devem ser interpretadas como NPS de nao compradores.
+- Entender motivos de nao conversao deve ser feito por pesquisa qualitativa, eventos de abandono ou survey especifico de leads.
 
 ## 13. Recomendacoes de negocio
 
@@ -1230,19 +1245,20 @@ Recomendacoes:
 - Testar campanhas de recuperacao para signups sem purchase.
 - Personalizar prova de valor por segmento.
 
-### 13.6 Investigar nao compradores com NPS baixo
+### 13.6 Investigar nao compradores e respostas NPS nao elegiveis
 
 Evidencia:
 
 - NPS de compradores: 33,33.
-- NPS de nao compradores: -29,46.
-- Existem 465 respostas de NPS de nao compradores.
+- Existem 465 respostas NPS associadas a usuarios sem compra no dataset.
+- Como NPS e tratado como pesquisa pos-compra, essas 465 respostas nao entram no indicador final.
 
 Recomendacoes:
 
 - Coletar motivo de nao compra.
-- Cruzar NPS baixo com canal, dispositivo e etapa de abandono.
-- Criar pesquisa qualitativa com usuarios que deram nota baixa e nao compraram.
+- Cruzar abandono com canal, dispositivo e etapa do funil.
+- Criar pesquisa qualitativa com usuarios que nao compraram.
+- Investigar se as respostas NPS sem compra indicam outra pesquisa, compra fora da janela ou problema de tracking.
 - Revisar onboarding para reduzir frustracao antes da compra.
 
 ## 14. Hipoteses de teste
@@ -1429,7 +1445,7 @@ py -3.13 -m pip install -r requirements.txt
 
 - O dashboard responde quais canais convertem melhor.
 - O dashboard evidencia o principal gargalo do funil.
-- A analise separa compradores e nao compradores no NPS.
+- A analise calcula NPS apenas para compradores elegiveis e trata respostas sem compra como ponto de investigacao.
 - As recomendacoes estao ligadas a evidencias.
 - O resumo executivo cabe em ate 2 paginas para submissao.
 - As hipoteses sao testaveis e priorizadas.
@@ -1439,7 +1455,7 @@ py -3.13 -m pip install -r requirements.txt
 ### 18.1 Riscos analiticos
 
 - Confundir correlacao com causalidade.
-- Interpretar NPS geral sem segmentar compradores e nao compradores.
+- Interpretar respostas NPS de usuarios sem compra como NPS valido de nao compradores.
 - Comparar canais sem considerar volume e incerteza estatistica.
 - Tratar taxa de signup como sucesso final, ignorando purchase.
 - Avaliar plano mais importante apenas por quantidade, sem receita.
@@ -1472,7 +1488,7 @@ py -3.13 -m pip install -r requirements.txt
 | Alta       | Escalar referral             | Alto             | Medio       | Melhor canal em conversao e NPS           |
 | Media      | Expandir email/lifecycle     | Medio            | Baixo/medio | Boa eficiencia e baixo volume             |
 | Media      | Fortalecer organic           | Alto             | Medio/alto  | Maior volume e boa conversao              |
-| Media      | Pesquisa com nao compradores | Medio            | Baixo       | NPS muito inferior no segmento            |
+| Media      | Pesquisa com nao compradores | Medio            | Baixo       | Entender motivos de abandono sem usar NPS indevido |
 | Baixa      | Otimizar mix de planos       | Indeterminado    | Medio       | Falta dado de receita/MRR                 |
 
 ## 20. Conclusao
@@ -1492,7 +1508,7 @@ Os dados indicam que o crescimento mais promissor passa por:
 3. Melhorar o funil mobile.
 4. Preservar e ampliar `organic`.
 5. Usar `email` para nutricao e recuperacao de usuarios.
-6. Investigar profundamente a experiencia de nao compradores, onde o NPS e muito mais fraco.
+6. Investigar profundamente a experiencia de nao compradores por pesquisa qualitativa e eventos de abandono, sem tratar respostas NPS nao elegiveis como NPS valido.
 
 ## 21. Status da implementacao local
 

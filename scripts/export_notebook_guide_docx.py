@@ -239,7 +239,7 @@ Fala sugerida:
 
 > No grafico mensal, setembro aparece como o melhor mes em conversao para compra e conversao pos-signup. Aqui o foco e a variacao ao longo do tempo.
 
-## Celula 33 - NPS geral e por segmento
+## Celula 33 - NPS de compradores elegiveis
 
 A tabela mostra `respostas`, `nps_medio`, `promotores`, `passivos`, `detratores` e `nps`.
 
@@ -249,15 +249,15 @@ Ponto importante:
 
 Fala sugerida:
 
-> Aqui eu separo compradores e nao compradores. Isso e importante porque o NPS geral pode esconder experiencias muito diferentes.
+> Aqui eu trato NPS como pesquisa pos-compra. Por isso, calculo o indicador apenas para compradores elegiveis.
 
-## Celula 34 - Grafico de NPS por segmento
+## Celula 34 - Grafico de NPS elegivel
 
-Mostra a diferenca entre compradores, nao compradores e geral.
+Mostra o NPS dos compradores elegiveis.
 
 Fala sugerida:
 
-> O grafico mostra que compradores avaliam melhor, enquanto nao compradores tem NPS negativo. Isso sugere friccao ou baixa percepcao de valor antes da compra.
+> O grafico mostra o NPS dos usuarios que compraram. Respostas associadas a usuarios sem compra nao devem ser interpretadas como NPS de nao compradores.
 
 ## Celula 37 - Conclusoes
 
@@ -268,11 +268,11 @@ Principais conclusoes:
 - referral e o canal de melhor qualidade;
 - paid e social precisam de otimizacao;
 - mobile e oportunidade por volume;
-- NPS deve ser lido separando compradores e nao compradores.
+- NPS deve ser lido apenas para compradores elegiveis; respostas sem compra viram ponto de investigacao.
 
 Fala sugerida:
 
-> No final, conecto os achados as recomendacoes: escalar referral, otimizar paid, melhorar mobile, fortalecer organic, trabalhar email/lifecycle e investigar nao compradores com NPS baixo.
+> No final, conecto os achados as recomendacoes: escalar referral, otimizar paid, melhorar mobile, fortalecer organic, trabalhar email/lifecycle e investigar nao compradores por abandono e pesquisa qualitativa.
 """.strip()
 
 

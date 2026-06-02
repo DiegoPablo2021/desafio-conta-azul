@@ -214,13 +214,14 @@ def build_document() -> "DocxDocument":
     add_heading(document, "Aba NPS", level=2)
     add_paragraph(document, "Essa aba responde: como esta a experiencia dos usuarios?")
     add_paragraph(document, "Ela mostra:")
-    for item in ["NPS compradores vs nao compradores.", "NPS geral.", "NPS por canal.", "Tabela detalhada."]:
+    for item in ["NPS de compradores elegiveis.", "Controle de respostas NPS nao elegiveis.", "NPS por canal.", "Tabela detalhada."]:
         add_bullet(document, item)
     add_paragraph(document, "Fala sugerida:")
     add_quote(
         document,
-        "Aqui eu evito olhar apenas o NPS medio geral, porque ele mascara comportamentos diferentes. "
-        "Compradores tem NPS estimado de 33,33, enquanto nao compradores tem NPS estimado de -29,46.",
+        "Aqui eu trato NPS como pesquisa pos-compra. Por isso, o indicador final considera apenas compradores "
+        "elegiveis. As respostas associadas a usuarios sem compra aparecem como alerta para investigar regra de "
+        "negocio, janela de atribuicao ou tracking.",
     )
     add_paragraph(document, "Sobre NPS por canal:")
     add_quote(
@@ -244,8 +245,9 @@ def build_document() -> "DocxDocument":
     add_paragraph(document, "Sobre `respostas_nps_nao_compradores = 465`:")
     add_quote(
         document,
-        "Esse ponto nao e erro. Ele mostra que existem respostas de NPS de usuarios que nao compraram. Por isso "
-        "eu tratei NPS como experiencia do usuario, nao apenas satisfacao de cliente pagante.",
+        "Esse ponto nao entra no NPS final. Como NPS e pos-compra, essas respostas sem compra sao tratadas como "
+        "ponto de investigacao: pode ser outro survey, compra fora da janela, atraso de tracking ou problema de "
+        "instrumentacao.",
     )
 
     add_heading(document, "Aba Resposta ao case", level=2)
@@ -270,7 +272,7 @@ def build_document() -> "DocxDocument":
         "Comece em Visao geral: mostre visitas, signups, compras e drop-offs.",
         "Va para Segmentos: mostre referral, email, organic, paid e social.",
         "Ainda em Segmentos: mostre desktop vs mobile e o heatmap.",
-        "Va para NPS: mostre compradores vs nao compradores e NPS por canal.",
+        "Va para NPS: mostre NPS de compradores elegiveis, controle de elegibilidade e NPS por canal.",
         "Va para Qualidade dos dados: mostre que nao ha inconsistencias criticas.",
         "Termine em Resposta ao case: conecte tudo ao que o desafio pediu.",
     ]:
@@ -305,14 +307,14 @@ def build_document() -> "DocxDocument":
         document,
         "Antes de concluir qualquer coisa, validei a base: duplicidades, compra sem signup, compra sem "
         "plano, NPS invalido e campos inconsistentes. Depois calculei as metricas com SQL no DuckDB e "
-        "comparei taxas por segmento, separando NPS de compradores e nao compradores.",
+        "comparei taxas por segmento e calculei NPS apenas para compradores elegiveis.",
     )
 
     add_paragraph(document, "Transformar achados em recomendacoes: ", bold_label="")
     add_paragraph(
         document,
         "A partir dos achados, recomendei escalar referral, otimizar paid antes de aumentar investimento, "
-        "melhorar mobile, fortalecer organic, usar email/lifecycle e investigar nao compradores com NPS baixo.",
+        "melhorar mobile, fortalecer organic, usar email/lifecycle e investigar nao compradores por abandono e pesquisa qualitativa.",
     )
 
     add_heading(document, "6. Principais achados para falar", level=1)
@@ -324,7 +326,7 @@ def build_document() -> "DocxDocument":
         "Organic combina escala e boa conversao.",
         "Paid tem alto volume, mas baixa eficiencia.",
         "Mobile tem mais visitas, mas converte menos que desktop.",
-        "Compradores tem NPS estimado de 33,33; nao compradores tem NPS estimado de -29,46.",
+        "Compradores elegiveis tem NPS estimado de 33,33; respostas sem compra nao entram no indicador final.",
     ]:
         add_bullet(document, item)
 
@@ -335,7 +337,7 @@ def build_document() -> "DocxDocument":
         "Melhorar UX, cadastro, onboarding e checkout mobile.",
         "Fortalecer organic com SEO e paginas orientadas ao ICP.",
         "Usar email/lifecycle para recuperar signups sem compra.",
-        "Investigar nao compradores com NPS baixo por pesquisa qualitativa.",
+        "Investigar nao compradores por pesquisa qualitativa e eventos de abandono.",
     ]:
         add_bullet(document, item)
 

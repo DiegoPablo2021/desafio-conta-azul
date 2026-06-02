@@ -6,11 +6,11 @@ select
     count(*) as visits,
     sum(signup) as signups,
     sum(purchase) as purchases,
-    sum(respondeu_nps) as nps_responses,
+    sum(case when purchase = 1 then respondeu_nps else 0 end) as nps_responses,
     sum(signup) * 1.0 / count(*) as visit_to_signup_rate,
     sum(purchase) * 1.0 / count(*) as visit_to_purchase_rate,
     sum(purchase) * 1.0 / nullif(sum(signup), 0) as signup_to_purchase_rate,
-    avg(nps_score) as avg_nps_score
+    avg(case when purchase = 1 then nps_score end) as avg_nps_score
 from stg_funnel_users;
 
 create or replace view vw_funnel_by_channel as
@@ -22,7 +22,7 @@ select
     sum(signup) * 1.0 / count(*) as visit_to_signup_rate,
     sum(purchase) * 1.0 / count(*) as visit_to_purchase_rate,
     sum(purchase) * 1.0 / nullif(sum(signup), 0) as signup_to_purchase_rate,
-    avg(nps_score) as avg_nps_score
+    avg(case when purchase = 1 then nps_score end) as avg_nps_score
 from stg_funnel_users
 group by channel;
 
@@ -35,7 +35,7 @@ select
     sum(signup) * 1.0 / count(*) as visit_to_signup_rate,
     sum(purchase) * 1.0 / count(*) as visit_to_purchase_rate,
     sum(purchase) * 1.0 / nullif(sum(signup), 0) as signup_to_purchase_rate,
-    avg(nps_score) as avg_nps_score
+    avg(case when purchase = 1 then nps_score end) as avg_nps_score
 from stg_funnel_users
 group by device;
 
@@ -48,7 +48,7 @@ select
     sum(signup) * 1.0 / count(*) as visit_to_signup_rate,
     sum(purchase) * 1.0 / count(*) as visit_to_purchase_rate,
     sum(purchase) * 1.0 / nullif(sum(signup), 0) as signup_to_purchase_rate,
-    avg(nps_score) as avg_nps_score
+    avg(case when purchase = 1 then nps_score end) as avg_nps_score
 from stg_funnel_users
 group by country;
 
@@ -61,7 +61,7 @@ select
     sum(signup) * 1.0 / count(*) as visit_to_signup_rate,
     sum(purchase) * 1.0 / count(*) as visit_to_purchase_rate,
     sum(purchase) * 1.0 / nullif(sum(signup), 0) as signup_to_purchase_rate,
-    avg(nps_score) as avg_nps_score
+    avg(case when purchase = 1 then nps_score end) as avg_nps_score
 from stg_funnel_users
 group by visit_month;
 
@@ -69,7 +69,7 @@ create or replace view vw_plan_mix as
 select
     plan,
     count(*) as purchases,
-    avg(nps_score) as avg_nps_score,
+    avg(case when purchase = 1 then nps_score end) as avg_nps_score,
     avg(days_to_purchase) as avg_days_to_purchase
 from stg_funnel_users
 where plan is not null
@@ -88,7 +88,7 @@ group by channel, device;
 create or replace view vw_nps_summary as
 with scored as (
     select
-        case when purchase = 1 then 'Compradores' else 'Nao compradores' end as segmento,
+        'Compradores' as segmento,
         nps_score,
         case
             when nps_score >= 9 then 'Promoter'
@@ -96,7 +96,8 @@ with scored as (
             else 'Detractor'
         end as nps_class
     from stg_funnel_users
-    where nps_score is not null
+    where purchase = 1
+      and nps_score is not null
 )
 select
     segmento,
@@ -112,6 +113,15 @@ select
 from scored
 group by segmento;
 
+create or replace view vw_nps_eligibility as
+select
+    sum(case when nps_score is not null then 1 else 0 end) as respostas_nps_na_base,
+    sum(case when purchase = 1 and nps_score is not null then 1 else 0 end) as respostas_nps_elegiveis,
+    sum(case when purchase = 0 and nps_score is not null then 1 else 0 end) as respostas_nps_nao_elegiveis,
+    sum(case when purchase = 1 and nps_score is not null then 1 else 0 end) * 1.0
+        / nullif(sum(case when nps_score is not null then 1 else 0 end), 0) as taxa_respostas_elegiveis
+from stg_funnel_users;
+
 create or replace view vw_nps_by_channel as
 with scored as (
     select
@@ -123,7 +133,8 @@ with scored as (
             else 'Detractor'
         end as nps_class
     from stg_funnel_users
-    where nps_score is not null
+    where purchase = 1
+      and nps_score is not null
 )
 select
     channel,

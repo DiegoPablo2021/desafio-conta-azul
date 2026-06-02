@@ -82,9 +82,10 @@ def build_document() -> DocxDocument:
     )
     add_paragraph(
         document,
-        "O NPS geral esconde diferencas importantes: compradores possuem NPS estimado "
-        "de 33,33, enquanto nao compradores possuem NPS estimado de -29,46. Portanto, "
-        "a experiencia dos usuarios que nao compram precisa ser investigada separadamente.",
+        "O NPS foi tratado como pesquisa pos-compra. Assim, o indicador final considera "
+        "apenas compradores elegiveis: 741 respostas, NPS medio de 8,62 e NPS estimado "
+        "de 33,33. As 465 respostas associadas a usuarios sem compra foram tratadas como "
+        "ponto de investigacao, nao como NPS valido de nao compradores.",
     )
 
     add_heading(document, "2. Gargalos e hipoteses", level=1)
@@ -114,7 +115,7 @@ def build_document() -> DocxDocument:
         "Melhorar a jornada mobile, reduzindo friccao no cadastro, onboarding e checkout.",
         "Fortalecer organic com SEO, conteudo orientado ao ICP e paginas de conversao mais contextualizadas.",
         "Explorar email/lifecycle para nutrir usuarios pos-visita e recuperar signups sem compra.",
-        "Investigar nao compradores com NPS baixo para identificar objeções, friccoes e lacunas de valor.",
+        "Investigar usuarios que nao compraram por pesquisa qualitativa, eventos de abandono e analise de jornada.",
     ]
     for item in recommendations:
         document.add_paragraph(item, style="List Bullet")

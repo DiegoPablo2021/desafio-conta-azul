@@ -34,7 +34,7 @@ A solucao cobre:
 - validacoes de qualidade dos dados;
 - metricas de funil geral e segmentado;
 - analise por canal, dispositivo, pais, mes e plano;
-- analise de NPS geral, por canal e por compradores vs nao compradores;
+- analise de NPS para compradores elegiveis e NPS por canal;
 - dashboard executivo em Streamlit;
 - consultas SQL reproduziveis com DuckDB;
 - notebook de investigacao analitica;
@@ -50,8 +50,8 @@ A solucao cobre:
 | Visit to signup | 29,83% |
 | Visit to purchase | 9,19% |
 | Signup to purchase | 30,81% |
-| Respostas NPS | 1.206 |
-| NPS medio | 8,11 |
+| Respostas NPS elegiveis | 741 |
+| NPS medio elegivel | 8,62 |
 
 Principais leituras:
 
@@ -61,7 +61,7 @@ Principais leituras:
 - `organic` combina volume e boa conversao.
 - `paid` e `social` apresentam baixa eficiencia de compra.
 - `mobile` concentra volume, mas converte menos que `desktop`.
-- Compradores apresentam NPS estimado positivo, enquanto nao compradores apresentam NPS estimado negativo.
+- O NPS deve ser interpretado como pesquisa pos-compra; respostas associadas a usuarios sem compra foram tratadas como ponto de investigacao, nao como NPS valido de nao compradores.
 
 ## Arquitetura
 
@@ -203,7 +203,7 @@ O dashboard possui cinco abas:
 
 - `Visao geral`: KPIs do funil, grafico de funil e evolucao mensal.
 - `Segmentos`: performance por canal, dispositivo, pais, plano e matriz canal x dispositivo.
-- `NPS`: NPS geral, compradores vs nao compradores e NPS por canal.
+- `NPS`: NPS de compradores elegiveis, NPS por canal e alerta de respostas nao elegiveis.
 - `Qualidade dos dados`: profiling e validacoes da base.
 - `Resposta ao case`: conexao direta entre achados, raciocinio analitico e recomendacoes.
 
@@ -232,6 +232,7 @@ Views criadas:
 - `vw_plan_mix`
 - `vw_channel_device`
 - `vw_nps_summary`
+- `vw_nps_eligibility`
 - `vw_nps_by_channel`
 
 Consultas complementares:
@@ -251,6 +252,7 @@ As validacoes ficam em `src/data_pipeline.py` e cobrem:
 - dias de conversao inconsistentes;
 - NPS preenchido sem resposta;
 - NPS fora do intervalo esperado;
+- respostas NPS associadas a usuarios sem compra, tratadas como registros nao elegiveis para NPS pos-compra;
 - categorias inesperadas em canal, dispositivo, pais e plano.
 
 Na base completa, as regras criticas do funil nao apresentaram inconsistencias.

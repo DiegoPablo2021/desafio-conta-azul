@@ -45,7 +45,7 @@ select
     sum(signup) * 1.0 / count(*) as visit_to_signup_rate,
     sum(purchase) * 1.0 / count(*) as visit_to_purchase_rate,
     sum(purchase) * 1.0 / nullif(sum(signup), 0) as signup_to_purchase_rate,
-    avg(nps_score) as avg_nps_score
+    avg(case when purchase = 1 then nps_score end) as avg_nps_score
 from stg_funnel_users
 group by visit_month
 order by visit_month;
